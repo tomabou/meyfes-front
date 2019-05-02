@@ -55,8 +55,22 @@ viewInput t p v toMsg =
 
 viewValidation : Model -> Html msg
 viewValidation model =
-    if model.password == model.passwordAgain then
+    if validation model then
         div [ style "color" "green" ] [ text "OK" ]
 
     else
         div [ style "color" "red" ] [ text "NG" ]
+
+
+validation : Model -> Bool
+validation model =
+    List.all identity
+        [ model.password
+            == model.passwordAgain
+        , String.length model.password
+            >= 8
+        , String.toUpper model.password
+            /= model.password
+        , String.toLower model.password
+            /= model.password
+        ]
