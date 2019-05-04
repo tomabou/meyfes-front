@@ -21,18 +21,21 @@ main =
 
 
 type alias Model =
-    { image : Maybe String }
+    { image : Maybe String
+    , convertedImage : Maybe String
+    }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model Nothing, Cmd.none )
+    ( Model Nothing Nothing, Cmd.none )
 
 
 type Msg
     = ImageRequested
     | ImageSelected File
     | ImageLoaded String
+    | ImageConverted (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -42,10 +45,33 @@ update msg model =
             ( model, Select.file [ "image/jpeg" ] ImageSelected )
 
         ImageSelected file ->
-            ( model, Task.perform ImageLoaded (File.toUrl file) )
+            ( model
+            , Cmd.batch
+                [ Task.perform ImageLoaded
+                    (File.toUrl file)
+                , Http.post
+                    { url = "http://localhost:5000"
+                    , body = Http.multipartBody [ Http.filePart "image" file ]
+                    , expect = Http.expectJson ImageConverted imageDecoder
+                    }
+                ]
+            )
 
         ImageLoaded url ->
             ( { model | image = Just url }, Cmd.none )
+
+        ImageConverted res ->
+            case res of
+                Ok url ->
+                    ( { model | convertedImage = Just url }, Cmd.none )
+
+                Err err ->
+                    ( model, Cmd.none )
+
+
+imageDecoder : Decoder String
+imageDecoder =
+    field "image_url" string
 
 
 view : Model -> Html Msg
@@ -64,9 +90,19 @@ viewImage model =
 
         Just url ->
             div []
-                [ text "Your image"
-                , img [ src url ] []
+                [ img [ src url, width 200 ] []
+                , viewConverted model
                 ]
+
+
+viewConverted : Model -> Html Msg
+viewConverted model =
+    case model.convertedImage of
+        Nothing ->
+            text "converting"
+
+        Just url ->
+            img [ src url, width 200 ] []
 
 
 subscriptions : Model -> Sub Msg
