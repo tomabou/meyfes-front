@@ -50,7 +50,7 @@ update msg model =
                 [ Task.perform ImageLoaded
                     (File.toUrl file)
                 , Http.post
-                    { url = "http://localhost:5000"
+                    { url = "http://104.196.143.181:3000"
                     , body = Http.multipartBody [ Http.filePart "image" file ]
                     , expect = Http.expectJson ImageConverted imageDecoder
                     }
