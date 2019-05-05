@@ -77,7 +77,7 @@ imageDecoder =
 view : Model -> Html Msg
 view model =
     div []
-        [ h2 [] [ text "image uploader" ]
+        [ h2 [ class "header" ] [ text "image uploader" ]
         , viewImage model
         ]
 
