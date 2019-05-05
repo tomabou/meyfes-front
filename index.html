@@ -4,11 +4,17 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Main</title>
+	<link rel="stylesheet" href="css/style.css">
+	<script src="js/index.js"></script>
 </head>
 
 <body>
 	<div id="elm"></div>
-	<script src="js/index.js"></script>
+	<script>
+		var app = Elm.Main.init({
+			node: document.getElementById('elm')
+		});
+	</script>
 </body>
 
 </html>
