@@ -6183,7 +6183,6 @@ var author$project$Main$update = F2(
 				}
 		}
 	});
-var author$project$Main$ImageRequested = {$: 'ImageRequested'};
 var elm$json$Json$Decode$map = _Json_map1;
 var elm$json$Json$Decode$map2 = _Json_map2;
 var elm$json$Json$Decode$succeed = _Json_succeed;
@@ -6199,7 +6198,8 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 			return 3;
 	}
 };
-var elm$html$Html$img = _VirtualDom_node('img');
+var elm$html$Html$h1 = _VirtualDom_node('h1');
+var elm$html$Html$header = _VirtualDom_node('header');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
 var elm$json$Json$Encode$string = _Json_wrap;
@@ -6210,6 +6210,37 @@ var elm$html$Html$Attributes$stringProperty = F2(
 			key,
 			elm$json$Json$Encode$string(string));
 	});
+var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
+var elm$html$Html$Attributes$href = function (url) {
+	return A2(
+		elm$html$Html$Attributes$stringProperty,
+		'href',
+		_VirtualDom_noJavaScriptUri(url));
+};
+var author$project$Main$viewHeader = function (model) {
+	return A2(
+		elm$html$Html$header,
+		_List_fromArray(
+			[
+				elm$html$Html$Attributes$class('header')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				elm$html$Html$h1,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('logo'),
+						elm$html$Html$Attributes$href('https://tomabou.com')
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('image uploader')
+					]))
+			]));
+};
+var author$project$Main$ImageRequested = {$: 'ImageRequested'};
+var elm$html$Html$img = _VirtualDom_node('img');
 var elm$html$Html$Attributes$src = function (url) {
 	return A2(
 		elm$html$Html$Attributes$stringProperty,
@@ -6264,7 +6295,8 @@ var author$project$Main$viewImage = function (model) {
 			elm$html$Html$button,
 			_List_fromArray(
 				[
-					elm$html$Html$Events$onClick(author$project$Main$ImageRequested)
+					elm$html$Html$Events$onClick(author$project$Main$ImageRequested),
+					elm$html$Html$Attributes$class('button1')
 				]),
 			_List_fromArray(
 				[
@@ -6289,25 +6321,49 @@ var author$project$Main$viewImage = function (model) {
 				]));
 	}
 };
-var elm$html$Html$h2 = _VirtualDom_node('h2');
-var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
+var elm$html$Html$footer = _VirtualDom_node('footer');
+var elm$html$Html$main_ = _VirtualDom_node('main');
 var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$div,
 		_List_Nil,
 		_List_fromArray(
 			[
+				author$project$Main$viewHeader(model),
 				A2(
-				elm$html$Html$h2,
+				elm$html$Html$div,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('header')
+						elm$html$Html$Attributes$class('wrapper'),
+						elm$html$Html$Attributes$class('clearfix')
 					]),
 				_List_fromArray(
 					[
-						elm$html$Html$text('image uploader')
+						A2(
+						elm$html$Html$main_,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('main')
+							]),
+						_List_fromArray(
+							[
+								author$project$Main$viewImage(model)
+							])),
+						A2(
+						elm$html$Html$div,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('sidemenu')
+							]),
+						_List_Nil)
 					])),
-				author$project$Main$viewImage(model)
+				A2(
+				elm$html$Html$footer,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('footer')
+					]),
+				_List_Nil)
 			]));
 };
 var elm$browser$Browser$External = function (a) {
