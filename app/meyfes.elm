@@ -77,8 +77,22 @@ imageDecoder =
 view : Model -> Html Msg
 view model =
     div []
-        [ h2 [ class "header" ] [ text "image uploader" ]
-        , viewImage model
+        [ viewHeader model
+        , div [ class "wrapper", class "clearfix" ]
+            [ main_ [ class "main" ]
+                [ viewImage model ]
+            , div [ class "sidemenu" ] []
+            ]
+        , footer [ class "footer" ] []
+        ]
+
+
+viewHeader : Model -> Html Msg
+viewHeader model =
+    header [ class "header" ]
+        [ h1 [ class "logo", href "https://tomabou.com" ]
+            [ text "image uploader"
+            ]
         ]
 
 
@@ -86,7 +100,11 @@ viewImage : Model -> Html Msg
 viewImage model =
     case model.image of
         Nothing ->
-            button [ onClick ImageRequested ] [ text "Load Image" ]
+            button
+                [ onClick ImageRequested
+                , class "button1"
+                ]
+                [ text "Load Image" ]
 
         Just url ->
             div []
