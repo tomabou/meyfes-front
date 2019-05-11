@@ -92,7 +92,7 @@ a:link, a:visited, a:hover, a:active{
     height: 500px;
 }
 
-.svg_graph{
+.svg_model{
     width:500px;
 }
 .vertex .active{
@@ -100,4 +100,9 @@ a:link, a:visited, a:hover, a:active{
 }
 .vertex .nonactive{
     fill: #aaa;
+}
+.edge {
+    stroke-width: 3;
+    stroke: #d03c56;
+    stroke-linecap: round;
 }

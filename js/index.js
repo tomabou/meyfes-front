@@ -4952,12 +4952,147 @@ var elm$core$Array$repeat = F2(
 				return e;
 			});
 	});
+var elm$core$Basics$identity = function (x) {
+	return x;
+};
+var elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var elm$core$Dict$empty = elm$core$Dict$RBEmpty_elm_builtin;
+var elm$core$Set$Set_elm_builtin = function (a) {
+	return {$: 'Set_elm_builtin', a: a};
+};
+var elm$core$Set$empty = elm$core$Set$Set_elm_builtin(elm$core$Dict$empty);
+var elm$core$Dict$Black = {$: 'Black'};
+var elm$core$Dict$RBNode_elm_builtin = F5(
+	function (a, b, c, d, e) {
+		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
+	});
+var elm$core$Basics$compare = _Utils_compare;
+var elm$core$Dict$Red = {$: 'Red'};
+var elm$core$Dict$balance = F5(
+	function (color, key, value, left, right) {
+		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
+			var _n1 = right.a;
+			var rK = right.b;
+			var rV = right.c;
+			var rLeft = right.d;
+			var rRight = right.e;
+			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
+				var _n3 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var lLeft = left.d;
+				var lRight = left.e;
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Red,
+					key,
+					value,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, lK, lV, lLeft, lRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					color,
+					rK,
+					rV,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, left, rLeft),
+					rRight);
+			}
+		} else {
+			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
+				var _n5 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var _n6 = left.d;
+				var _n7 = _n6.a;
+				var llK = _n6.b;
+				var llV = _n6.c;
+				var llLeft = _n6.d;
+				var llRight = _n6.e;
+				var lRight = left.e;
+				return A5(
+					elm$core$Dict$RBNode_elm_builtin,
+					elm$core$Dict$Red,
+					lK,
+					lV,
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, llK, llV, llLeft, llRight),
+					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, key, value, lRight, right));
+			} else {
+				return A5(elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
+			}
+		}
+	});
+var elm$core$Dict$insertHelp = F3(
+	function (key, value, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, elm$core$Dict$RBEmpty_elm_builtin, elm$core$Dict$RBEmpty_elm_builtin);
+		} else {
+			var nColor = dict.a;
+			var nKey = dict.b;
+			var nValue = dict.c;
+			var nLeft = dict.d;
+			var nRight = dict.e;
+			var _n1 = A2(elm$core$Basics$compare, key, nKey);
+			switch (_n1.$) {
+				case 'LT':
+					return A5(
+						elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						A3(elm$core$Dict$insertHelp, key, value, nLeft),
+						nRight);
+				case 'EQ':
+					return A5(elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
+				default:
+					return A5(
+						elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						nLeft,
+						A3(elm$core$Dict$insertHelp, key, value, nRight));
+			}
+		}
+	});
+var elm$core$Dict$insert = F3(
+	function (key, value, dict) {
+		var _n0 = A3(elm$core$Dict$insertHelp, key, value, dict);
+		if ((_n0.$ === 'RBNode_elm_builtin') && (_n0.a.$ === 'Red')) {
+			var _n1 = _n0.a;
+			var k = _n0.b;
+			var v = _n0.c;
+			var l = _n0.d;
+			var r = _n0.e;
+			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _n0;
+			return x;
+		}
+	});
+var elm$core$Set$insert = F2(
+	function (key, _n0) {
+		var dict = _n0.a;
+		return elm$core$Set$Set_elm_builtin(
+			A3(elm$core$Dict$insert, key, _Utils_Tuple0, dict));
+	});
+var elm$core$Set$fromList = function (list) {
+	return A3(elm$core$List$foldl, elm$core$Set$insert, elm$core$Set$empty, list);
+};
 var author$project$Graph$initial = F2(
 	function (x, y) {
-		return A2(
-			elm$core$Array$repeat,
-			x,
-			A2(elm$core$Array$repeat, y, false));
+		return {
+			edgeC: elm$core$Set$empty,
+			edgeR: elm$core$Set$fromList(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(1, 3)
+					])),
+			vertex: A2(
+				elm$core$Array$repeat,
+				x,
+				A2(elm$core$Array$repeat, y, false))
+		};
 	});
 var author$project$Main$Model = F3(
 	function (image, convertedImage, gridGraph) {
@@ -5194,7 +5329,7 @@ var author$project$Main$init = function (_n0) {
 			author$project$Main$Model,
 			elm$core$Maybe$Nothing,
 			elm$core$Maybe$Nothing,
-			A2(author$project$Graph$initial, 50, 60)),
+			A2(author$project$Graph$initial, 20, 20)),
 		elm$core$Platform$Cmd$none);
 };
 var elm$core$Platform$Sub$batch = _Platform_batch;
@@ -5222,9 +5357,6 @@ var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$string = _Json_decodeString;
 var author$project$Main$imageDecoder = A2(elm$json$Json$Decode$field, 'image_url', elm$json$Json$Decode$string);
 var elm$core$Platform$Cmd$map = _Platform_map;
-var elm$core$Basics$identity = function (x) {
-	return x;
-};
 var elm$core$Task$Perform = function (a) {
 	return {$: 'Perform', a: a};
 };
@@ -5401,9 +5533,6 @@ var elm$core$Basics$composeR = F3(
 		return g(
 			f(x));
 	});
-var elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
-var elm$core$Dict$empty = elm$core$Dict$RBEmpty_elm_builtin;
-var elm$core$Basics$compare = _Utils_compare;
 var elm$core$Dict$get = F2(
 	function (targetKey, dict) {
 		get:
@@ -5433,114 +5562,6 @@ var elm$core$Dict$get = F2(
 						continue get;
 				}
 			}
-		}
-	});
-var elm$core$Dict$Black = {$: 'Black'};
-var elm$core$Dict$RBNode_elm_builtin = F5(
-	function (a, b, c, d, e) {
-		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
-	});
-var elm$core$Dict$Red = {$: 'Red'};
-var elm$core$Dict$balance = F5(
-	function (color, key, value, left, right) {
-		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
-			var _n1 = right.a;
-			var rK = right.b;
-			var rV = right.c;
-			var rLeft = right.d;
-			var rRight = right.e;
-			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
-				var _n3 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var lLeft = left.d;
-				var lRight = left.e;
-				return A5(
-					elm$core$Dict$RBNode_elm_builtin,
-					elm$core$Dict$Red,
-					key,
-					value,
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, lK, lV, lLeft, lRight),
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, rK, rV, rLeft, rRight));
-			} else {
-				return A5(
-					elm$core$Dict$RBNode_elm_builtin,
-					color,
-					rK,
-					rV,
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, left, rLeft),
-					rRight);
-			}
-		} else {
-			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
-				var _n5 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var _n6 = left.d;
-				var _n7 = _n6.a;
-				var llK = _n6.b;
-				var llV = _n6.c;
-				var llLeft = _n6.d;
-				var llRight = _n6.e;
-				var lRight = left.e;
-				return A5(
-					elm$core$Dict$RBNode_elm_builtin,
-					elm$core$Dict$Red,
-					lK,
-					lV,
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, llK, llV, llLeft, llRight),
-					A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, key, value, lRight, right));
-			} else {
-				return A5(elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
-			}
-		}
-	});
-var elm$core$Dict$insertHelp = F3(
-	function (key, value, dict) {
-		if (dict.$ === 'RBEmpty_elm_builtin') {
-			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Red, key, value, elm$core$Dict$RBEmpty_elm_builtin, elm$core$Dict$RBEmpty_elm_builtin);
-		} else {
-			var nColor = dict.a;
-			var nKey = dict.b;
-			var nValue = dict.c;
-			var nLeft = dict.d;
-			var nRight = dict.e;
-			var _n1 = A2(elm$core$Basics$compare, key, nKey);
-			switch (_n1.$) {
-				case 'LT':
-					return A5(
-						elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						A3(elm$core$Dict$insertHelp, key, value, nLeft),
-						nRight);
-				case 'EQ':
-					return A5(elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
-				default:
-					return A5(
-						elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						nLeft,
-						A3(elm$core$Dict$insertHelp, key, value, nRight));
-			}
-		}
-	});
-var elm$core$Dict$insert = F3(
-	function (key, value, dict) {
-		var _n0 = A3(elm$core$Dict$insertHelp, key, value, dict);
-		if ((_n0.$ === 'RBNode_elm_builtin') && (_n0.a.$ === 'Red')) {
-			var _n1 = _n0.a;
-			var k = _n0.b;
-			var v = _n0.c;
-			var l = _n0.d;
-			var r = _n0.e;
-			return A5(elm$core$Dict$RBNode_elm_builtin, elm$core$Dict$Black, k, v, l, r);
-		} else {
-			var x = _n0;
-			return x;
 		}
 	});
 var elm$core$Dict$getMin = function (dict) {
@@ -6304,9 +6325,9 @@ var elm$core$Array$length = function (_n0) {
 	var len = _n0.a;
 	return len;
 };
-var author$project$Graph$getSize = function (graph) {
+var author$project$Graph$getSize = function (model) {
 	var yInd = function () {
-		var _n0 = A2(elm$core$Array$get, 1, graph);
+		var _n0 = A2(elm$core$Array$get, 1, model.vertex);
 		if (_n0.$ === 'Nothing') {
 			return 0;
 		} else {
@@ -6314,8 +6335,101 @@ var author$project$Graph$getSize = function (graph) {
 			return elm$core$Array$length(column);
 		}
 	}();
-	var xInd = elm$core$Array$length(graph);
+	var xInd = elm$core$Array$length(model.vertex);
 	return _Utils_Tuple2(xInd, yInd);
+};
+var author$project$Graph$indexToString = function (i) {
+	return elm$core$String$fromInt((i * 10) + 3);
+};
+var elm$json$Json$Decode$map = _Json_map1;
+var elm$json$Json$Decode$map2 = _Json_map2;
+var elm$json$Json$Decode$succeed = _Json_succeed;
+var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
+	switch (handler.$) {
+		case 'Normal':
+			return 0;
+		case 'MayStopPropagation':
+			return 1;
+		case 'MayPreventDefault':
+			return 2;
+		default:
+			return 3;
+	}
+};
+var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var elm$svg$Svg$g = elm$svg$Svg$trustedNode('g');
+var elm$svg$Svg$line = elm$svg$Svg$trustedNode('line');
+var elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
+var elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
+var elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
+var elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
+var author$project$Graph$calcEdgeC = function (set) {
+	var func = function (_n0) {
+		var i = _n0.a;
+		var j = _n0.b;
+		return A2(
+			elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					elm$svg$Svg$Attributes$x1(
+					author$project$Graph$indexToString(i)),
+					elm$svg$Svg$Attributes$y1(
+					author$project$Graph$indexToString(j)),
+					elm$svg$Svg$Attributes$x2(
+					author$project$Graph$indexToString(i)),
+					elm$svg$Svg$Attributes$y2(
+					author$project$Graph$indexToString(j + 1))
+				]),
+			_List_Nil);
+	};
+	return A2(
+		elm$svg$Svg$g,
+		_List_Nil,
+		A2(
+			elm$core$List$map,
+			func,
+			elm$core$Set$toList(set)));
+};
+var author$project$Graph$calcEdgeR = function (set) {
+	var func = function (_n0) {
+		var i = _n0.a;
+		var j = _n0.b;
+		return A2(
+			elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					elm$svg$Svg$Attributes$x1(
+					author$project$Graph$indexToString(i)),
+					elm$svg$Svg$Attributes$y1(
+					author$project$Graph$indexToString(j)),
+					elm$svg$Svg$Attributes$x2(
+					author$project$Graph$indexToString(i + 1)),
+					elm$svg$Svg$Attributes$y2(
+					author$project$Graph$indexToString(j))
+				]),
+			_List_Nil);
+	};
+	return A2(
+		elm$svg$Svg$g,
+		_List_Nil,
+		A2(
+			elm$core$List$map,
+			func,
+			elm$core$Set$toList(set)));
+};
+var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
+var author$project$Graph$viewEdge = function (model) {
+	return A2(
+		elm$svg$Svg$g,
+		_List_fromArray(
+			[
+				elm$svg$Svg$Attributes$class('edge')
+			]),
+		_List_fromArray(
+			[
+				author$project$Graph$calcEdgeC(model.edgeC),
+				author$project$Graph$calcEdgeR(model.edgeR)
+			]));
 };
 var elm$core$Elm$JsArray$foldl = _JsArray_foldl;
 var elm$core$Elm$JsArray$indexedMap = _JsArray_indexedMap;
@@ -6355,24 +6469,7 @@ var elm$core$Array$indexedMap = F2(
 			true,
 			A3(elm$core$Elm$JsArray$foldl, helper, initialBuilder, tree));
 	});
-var elm$json$Json$Decode$map = _Json_map1;
-var elm$json$Json$Decode$map2 = _Json_map2;
-var elm$json$Json$Decode$succeed = _Json_succeed;
-var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
-	switch (handler.$) {
-		case 'Normal':
-			return 0;
-		case 'MayStopPropagation':
-			return 1;
-		case 'MayPreventDefault':
-			return 2;
-		default:
-			return 3;
-	}
-};
-var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
-var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
 var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
 var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
@@ -6386,9 +6483,9 @@ var author$project$Graph$calcVertex = F2(
 					_List_fromArray(
 						[
 							elm$svg$Svg$Attributes$cx(
-							elm$core$String$fromInt((xInd * 10) + 3)),
+							author$project$Graph$indexToString(xInd)),
 							elm$svg$Svg$Attributes$cy(
-							elm$core$String$fromInt((yInd * 10) + 3)),
+							author$project$Graph$indexToString(yInd)),
 							elm$svg$Svg$Attributes$r('3'),
 							elm$svg$Svg$Attributes$class(className)
 						]),
@@ -6407,9 +6504,8 @@ var elm$core$List$append = F2(
 var elm$core$List$concat = function (lists) {
 	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
 };
-var elm$svg$Svg$g = elm$svg$Svg$trustedNode('g');
 var author$project$Graph$viewVertex = function (model) {
-	var svgMsgArray = A2(elm$core$Array$indexedMap, author$project$Graph$calcVertex, model);
+	var svgMsgArray = A2(elm$core$Array$indexedMap, author$project$Graph$calcVertex, model.vertex);
 	return A2(
 		elm$svg$Svg$g,
 		_List_fromArray(
@@ -6424,8 +6520,8 @@ var author$project$Graph$viewVertex = function (model) {
 };
 var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
 var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
-var author$project$Graph$view = function (graph) {
-	var _n0 = author$project$Graph$getSize(graph);
+var author$project$Graph$view = function (model) {
+	var _n0 = author$project$Graph$getSize(model);
 	var xInd = _n0.a;
 	var yInd = _n0.b;
 	return A2(
@@ -6434,11 +6530,12 @@ var author$project$Graph$view = function (graph) {
 			[
 				elm$svg$Svg$Attributes$viewBox(
 				'0 0 ' + (elm$core$String$fromInt(xInd * 10) + (' ' + elm$core$String$fromInt(yInd * 10)))),
-				elm$svg$Svg$Attributes$class('svg_graph')
+				elm$svg$Svg$Attributes$class('svg_model')
 			]),
 		_List_fromArray(
 			[
-				author$project$Graph$viewVertex(graph)
+				author$project$Graph$viewVertex(model),
+				author$project$Graph$viewEdge(model)
 			]));
 };
 var elm$html$Html$h1 = _VirtualDom_node('h1');

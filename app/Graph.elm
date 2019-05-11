@@ -21,7 +21,7 @@ type Msg
 initial : Int -> Int -> Model
 initial x y =
     { vertex = Array.repeat x (Array.repeat y False)
-    , edgeR = Set.empty
+    , edgeR = Set.fromList [ ( 1, 3 ) ]
     , edgeC = Set.empty
     }
 
@@ -32,15 +32,115 @@ update msg graph =
 
 
 view : Model -> Html.Html Msg
-view graph =
+view model =
     let
         ( xInd, yInd ) =
-            getSize graph
+            getSize model
     in
     svg
-        [ viewBox ("0 0 " ++ String.fromInt (xInd * 10) ++ " " ++ String.fromInt (yInd * 10)), class "svg_graph" ]
-        [ viewVertex graph
+        [ viewBox ("0 0 " ++ String.fromInt (xInd * 10) ++ " " ++ String.fromInt (yInd * 10)), class "svg_model" ]
+        [ viewVertex model
+        , viewEdge model
         ]
+
+
+hasVertex : Int -> Int -> Model -> Bool
+hasVertex i j model =
+    case get i model.vertex of
+        Nothing ->
+            False
+
+        Just column ->
+            case get j column of
+                Nothing ->
+                    False
+
+                Just ans ->
+                    ans
+
+
+putVertex : Int -> Int -> Model -> Model
+putVertex i j model =
+    let
+        vertex =
+            case get i model.vertex of
+                Nothing ->
+                    model.vertex
+
+                Just column ->
+                    Array.set i (Array.set j True column) model.vertex
+
+        edgeC =
+            if hasVertex i (j + 1) model then
+                Set.insert ( i, j ) model.edgeC
+
+            else
+                model.edgeC
+
+        edgeC2 =
+            if hasVertex i (j - 1) model then
+                Set.insert ( i, j - 1 ) edgeC
+
+            else
+                edgeC
+
+        edgeR =
+            if hasVertex (i + 1) j model then
+                Set.insert ( i, j ) model.edgeR
+
+            else
+                model.edgeR
+
+        edgeR2 =
+            if hasVertex (i - 1) j model then
+                Set.insert ( i - 1, j ) edgeR
+
+            else
+                edgeR
+    in
+    { model | vertex = vertex, edgeC = edgeC2, edgeR = edgeR2 }
+
+
+deleteVertex : Int -> Int -> Model -> Model
+deleteVertex i j model =
+    let
+        vertex =
+            case get i model.vertex of
+                Nothing ->
+                    model.vertex
+
+                Just column ->
+                    Array.set i (Array.set j False column) model.vertex
+
+        edgeC =
+            if hasVertex i (j + 1) model then
+                Set.remove ( i, j ) model.edgeC
+
+            else
+                model.edgeC
+
+        edgeC2 =
+            if hasVertex i (j - 1) model then
+                Set.remove ( i, j - 1 ) edgeC
+
+            else
+                edgeC
+
+        edgeR =
+            if hasVertex (i + 1) j model then
+                Set.remove ( i, j ) model.edgeR
+
+            else
+                model.edgeR
+
+        edgeR2 =
+            if hasVertex (i - 1) j model then
+                Set.remove ( i - 1, j ) edgeR
+
+            else
+                edgeR
+    in
+    { model | vertex = vertex, edgeC = edgeC2, edgeR = edgeR2 }
 
 
 getSize : Model -> ( Int, Int )
@@ -93,7 +193,7 @@ calcVertex xInd column =
 
 viewEdge : Model -> Svg Msg
 viewEdge model =
-    g [] [ calcEdgeC model.edgeC, calcEdgeR model.edgeR ]
+    g [ class "edge" ] [ calcEdgeC model.edgeC, calcEdgeR model.edgeR ]
 
 
 calcEdgeC : Set.Set ( Int, Int ) -> Svg Msg
