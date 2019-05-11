@@ -77,10 +77,12 @@ a:link, a:visited, a:hover, a:active{
     clear: both;
 }
 
-.header .main .sidemenu .footer {
+/*
+.header, .main, .sidemenu, .footer {
     border: 1px solid #aaa;
     background-color: #ccc;
 }
+*/
 
 .header .footer{
     height: 100px;
@@ -91,6 +93,12 @@ a:link, a:visited, a:hover, a:active{
 }
 
 .svg_graph{
-    width:300px;
-    height: 300px;
+    width:500px;
+    height: 500px;
+}
+.vertex .active{
+    fill: #d03c56;
+}
+.vertex .nonactive{
+    fill: #aaa;
 }

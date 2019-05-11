@@ -32,7 +32,9 @@ view graph =
     in
     svg
         [ viewBox ("0 0 " ++ String.fromInt (xInd * 10) ++ " " ++ String.fromInt (yInd * 10)), class "svg_graph" ]
-        [ rect [ x "10", y "10", width "100", height "100", rx "15", ry "15" ] [] ]
+        [ rect [ x "10", y "10", width "100", height "100", rx "15", ry "15" ] []
+        , viewVertex graph
+        ]
 
 
 getSize : Model -> ( Int, Int )
@@ -52,13 +54,13 @@ getSize graph =
     ( xInd, yInd )
 
 
-viewVertex : Model -> List (Svg Msg)
+viewVertex : Model -> Svg Msg
 viewVertex model =
     let
         svgMsgArray =
             indexedMap calcVertex model
     in
-    List.concat (List.map toList (toList svgMsgArray))
+    g [ class "vertex" ] (List.concat (List.map toList (toList svgMsgArray)))
 
 
 calcVertex : Int -> Array Bool -> Array (Svg Msg)
@@ -68,11 +70,11 @@ calcVertex xInd column =
             let
                 className =
                     if status then
-                        "true_vertex"
+                        "active"
 
                     else
-                        "false_vertex"
+                        "nonactive"
             in
-            circle [ cx (String.fromInt (xInd * 10)), cy (String.fromInt (yInd * 10)), r "3", class className ] []
+            circle [ cx (String.fromInt (xInd * 10 + 3)), cy (String.fromInt (yInd * 10 + 3)), r "3", class className ] []
     in
     indexedMap func column

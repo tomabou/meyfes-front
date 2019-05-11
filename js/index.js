@@ -6317,6 +6317,44 @@ var author$project$Graph$getSize = function (graph) {
 	var xInd = elm$core$Array$length(graph);
 	return _Utils_Tuple2(xInd, yInd);
 };
+var elm$core$Elm$JsArray$foldl = _JsArray_foldl;
+var elm$core$Elm$JsArray$indexedMap = _JsArray_indexedMap;
+var elm$core$Array$indexedMap = F2(
+	function (func, _n0) {
+		var len = _n0.a;
+		var tree = _n0.c;
+		var tail = _n0.d;
+		var initialBuilder = {
+			nodeList: _List_Nil,
+			nodeListSize: 0,
+			tail: A3(
+				elm$core$Elm$JsArray$indexedMap,
+				func,
+				elm$core$Array$tailIndex(len),
+				tail)
+		};
+		var helper = F2(
+			function (node, builder) {
+				if (node.$ === 'SubTree') {
+					var subTree = node.a;
+					return A3(elm$core$Elm$JsArray$foldl, helper, builder, subTree);
+				} else {
+					var leaf = node.a;
+					var offset = builder.nodeListSize * elm$core$Array$branchFactor;
+					var mappedLeaf = elm$core$Array$Leaf(
+						A3(elm$core$Elm$JsArray$indexedMap, func, offset, leaf));
+					return {
+						nodeList: A2(elm$core$List$cons, mappedLeaf, builder.nodeList),
+						nodeListSize: builder.nodeListSize + 1,
+						tail: builder.tail
+					};
+				}
+			});
+		return A2(
+			elm$core$Array$builderToArray,
+			true,
+			A3(elm$core$Elm$JsArray$foldl, helper, initialBuilder, tree));
+	});
 var elm$json$Json$Decode$map = _Json_map1;
 var elm$json$Json$Decode$map2 = _Json_map2;
 var elm$json$Json$Decode$succeed = _Json_succeed;
@@ -6333,9 +6371,59 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	}
 };
 var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
+var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
+var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
+var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
+var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
+var author$project$Graph$calcVertex = F2(
+	function (xInd, column) {
+		var func = F2(
+			function (yInd, status) {
+				var className = status ? 'active' : 'nonactive';
+				return A2(
+					elm$svg$Svg$circle,
+					_List_fromArray(
+						[
+							elm$svg$Svg$Attributes$cx(
+							elm$core$String$fromInt((xInd * 10) + 3)),
+							elm$svg$Svg$Attributes$cy(
+							elm$core$String$fromInt((yInd * 10) + 3)),
+							elm$svg$Svg$Attributes$r('3'),
+							elm$svg$Svg$Attributes$class(className)
+						]),
+					_List_Nil);
+			});
+		return A2(elm$core$Array$indexedMap, func, column);
+	});
+var elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
+		}
+	});
+var elm$core$List$concat = function (lists) {
+	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
+};
+var elm$svg$Svg$g = elm$svg$Svg$trustedNode('g');
+var author$project$Graph$viewVertex = function (model) {
+	var svgMsgArray = A2(elm$core$Array$indexedMap, author$project$Graph$calcVertex, model);
+	return A2(
+		elm$svg$Svg$g,
+		_List_fromArray(
+			[
+				elm$svg$Svg$Attributes$class('vertex')
+			]),
+		elm$core$List$concat(
+			A2(
+				elm$core$List$map,
+				elm$core$Array$toList,
+				elm$core$Array$toList(svgMsgArray))));
+};
 var elm$svg$Svg$rect = elm$svg$Svg$trustedNode('rect');
 var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
-var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
 var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
 var elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
 var elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
@@ -6368,7 +6456,8 @@ var author$project$Graph$view = function (graph) {
 						elm$svg$Svg$Attributes$rx('15'),
 						elm$svg$Svg$Attributes$ry('15')
 					]),
-				_List_Nil)
+				_List_Nil),
+				author$project$Graph$viewVertex(graph)
 			]));
 };
 var elm$html$Html$h1 = _VirtualDom_node('h1');
