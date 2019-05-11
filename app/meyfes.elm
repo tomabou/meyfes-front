@@ -1,8 +1,10 @@
 module Main exposing (main)
 
+import Array
 import Browser
 import File exposing (File)
 import File.Select as Select
+import Graph
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -23,12 +25,13 @@ main =
 type alias Model =
     { image : Maybe String
     , convertedImage : Maybe String
+    , gridGraph : Graph.Model
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model Nothing Nothing, Cmd.none )
+    ( Model Nothing Nothing (Graph.initial 30 30), Cmd.none )
 
 
 type Msg
@@ -36,6 +39,7 @@ type Msg
     | ImageSelected File
     | ImageLoaded String
     | ImageConverted (Result Http.Error String)
+    | GotGraphMsg Graph.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -68,6 +72,13 @@ update msg model =
                 Err err ->
                     ( model, Cmd.none )
 
+        GotGraphMsg graphMsg ->
+            let
+                ( graph, cmd ) =
+                    Graph.update graphMsg model.gridGraph
+            in
+            ( { model | gridGraph = graph }, Cmd.map GotGraphMsg cmd )
+
 
 imageDecoder : Decoder String
 imageDecoder =
@@ -80,7 +91,9 @@ view model =
         [ viewHeader model
         , div [ class "wrapper", class "clearfix" ]
             [ main_ [ class "main" ]
-                [ viewImage model ]
+                [ viewImage model
+                , Html.map GotGraphMsg (Graph.view model.gridGraph)
+                ]
             , div [ class "sidemenu" ] []
             ]
         , footer [ class "footer" ] []

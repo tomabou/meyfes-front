@@ -4654,20 +4654,11 @@ function _Browser_load(url)
 		}
 	}));
 }
-var author$project$Main$Model = F2(
-	function (image, convertedImage) {
-		return {convertedImage: convertedImage, image: image};
+var elm$core$Array$branchFactor = 32;
+var elm$core$Array$Array_elm_builtin = F4(
+	function (a, b, c, d) {
+		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
 	});
-var elm$core$Maybe$Nothing = {$: 'Nothing'};
-var elm$core$Basics$False = {$: 'False'};
-var elm$core$Basics$True = {$: 'True'};
-var elm$core$Result$isOk = function (result) {
-	if (result.$ === 'Ok') {
-		return true;
-	} else {
-		return false;
-	}
-};
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$GT = {$: 'GT'};
 var elm$core$Basics$LT = {$: 'LT'};
@@ -4748,11 +4739,6 @@ var elm$core$Array$foldr = F3(
 var elm$core$Array$toList = function (array) {
 	return A3(elm$core$Array$foldr, elm$core$List$cons, _List_Nil, array);
 };
-var elm$core$Array$branchFactor = 32;
-var elm$core$Array$Array_elm_builtin = F4(
-	function (a, b, c, d) {
-		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
-	});
 var elm$core$Basics$ceiling = _Basics_ceiling;
 var elm$core$Basics$fdiv = _Basics_fdiv;
 var elm$core$Basics$logBase = F2(
@@ -4877,6 +4863,7 @@ var elm$core$Array$builderToArray = F2(
 				builder.tail);
 		}
 	});
+var elm$core$Basics$False = {$: 'False'};
 var elm$core$Basics$idiv = _Basics_idiv;
 var elm$core$Basics$lt = _Utils_lt;
 var elm$core$Elm$JsArray$initialize = _JsArray_initialize;
@@ -4919,6 +4906,35 @@ var elm$core$Array$initialize = F2(
 			return A5(elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
 		}
 	});
+var elm$core$Array$repeat = F2(
+	function (n, e) {
+		return A2(
+			elm$core$Array$initialize,
+			n,
+			function (_n0) {
+				return e;
+			});
+	});
+var author$project$Graph$initial = F2(
+	function (x, y) {
+		return A2(
+			elm$core$Array$repeat,
+			x,
+			A2(elm$core$Array$repeat, y, false));
+	});
+var author$project$Main$Model = F3(
+	function (image, convertedImage, gridGraph) {
+		return {convertedImage: convertedImage, gridGraph: gridGraph, image: image};
+	});
+var elm$core$Maybe$Nothing = {$: 'Nothing'};
+var elm$core$Basics$True = {$: 'True'};
+var elm$core$Result$isOk = function (result) {
+	if (result.$ === 'Ok') {
+		return true;
+	} else {
+		return false;
+	}
+};
 var elm$core$Maybe$Just = function (a) {
 	return {$: 'Just', a: a};
 };
@@ -5137,13 +5153,24 @@ var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$init = function (_n0) {
 	return _Utils_Tuple2(
-		A2(author$project$Main$Model, elm$core$Maybe$Nothing, elm$core$Maybe$Nothing),
+		A3(
+			author$project$Main$Model,
+			elm$core$Maybe$Nothing,
+			elm$core$Maybe$Nothing,
+			A2(author$project$Graph$initial, 30, 30)),
 		elm$core$Platform$Cmd$none);
 };
 var elm$core$Platform$Sub$batch = _Platform_batch;
 var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
 var author$project$Main$subscriptions = function (model) {
 	return elm$core$Platform$Sub$none;
+};
+var author$project$Graph$update = F2(
+	function (msg, graph) {
+		return _Utils_Tuple2(graph, elm$core$Platform$Cmd$none);
+	});
+var author$project$Main$GotGraphMsg = function (a) {
+	return {$: 'GotGraphMsg', a: a};
 };
 var author$project$Main$ImageConverted = function (a) {
 	return {$: 'ImageConverted', a: a};
@@ -5157,6 +5184,7 @@ var author$project$Main$ImageSelected = function (a) {
 var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$string = _Json_decodeString;
 var author$project$Main$imageDecoder = A2(elm$json$Json$Decode$field, 'image_url', elm$json$Json$Decode$string);
+var elm$core$Platform$Cmd$map = _Platform_map;
 var elm$core$Basics$identity = function (x) {
 	return x;
 };
@@ -6166,7 +6194,7 @@ var author$project$Main$update = F2(
 							image: elm$core$Maybe$Just(url)
 						}),
 					elm$core$Platform$Cmd$none);
-			default:
+			case 'ImageConverted':
 				var res = msg.a;
 				if (res.$ === 'Ok') {
 					var url = res.a;
@@ -6181,6 +6209,16 @@ var author$project$Main$update = F2(
 					var err = res.a;
 					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 				}
+			default:
+				var graphMsg = msg.a;
+				var _n2 = A2(author$project$Graph$update, graphMsg, model.gridGraph);
+				var graph = _n2.a;
+				var cmd = _n2.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{gridGraph: graph}),
+					A2(elm$core$Platform$Cmd$map, author$project$Main$GotGraphMsg, cmd));
 		}
 	});
 var elm$json$Json$Decode$map = _Json_map1;
@@ -6197,6 +6235,41 @@ var elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 		default:
 			return 3;
 	}
+};
+var elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var elm$svg$Svg$rect = elm$svg$Svg$trustedNode('rect');
+var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
+var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
+var elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
+var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
+var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
+var author$project$Graph$view = function (graph) {
+	return A2(
+		elm$svg$Svg$svg,
+		_List_fromArray(
+			[
+				elm$svg$Svg$Attributes$width('120'),
+				elm$svg$Svg$Attributes$height('120'),
+				elm$svg$Svg$Attributes$viewBox('0 0 120 120')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$x('10'),
+						elm$svg$Svg$Attributes$y('10'),
+						elm$svg$Svg$Attributes$width('100'),
+						elm$svg$Svg$Attributes$height('100'),
+						elm$svg$Svg$Attributes$rx('15'),
+						elm$svg$Svg$Attributes$ry('15')
+					]),
+				_List_Nil)
+			]));
 };
 var elm$html$Html$h1 = _VirtualDom_node('h1');
 var elm$html$Html$header = _VirtualDom_node('header');
@@ -6323,6 +6396,8 @@ var author$project$Main$viewImage = function (model) {
 };
 var elm$html$Html$footer = _VirtualDom_node('footer');
 var elm$html$Html$main_ = _VirtualDom_node('main');
+var elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
+var elm$html$Html$map = elm$virtual_dom$VirtualDom$map;
 var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$div,
@@ -6347,7 +6422,11 @@ var author$project$Main$view = function (model) {
 							]),
 						_List_fromArray(
 							[
-								author$project$Main$viewImage(model)
+								author$project$Main$viewImage(model),
+								A2(
+								elm$html$Html$map,
+								author$project$Main$GotGraphMsg,
+								author$project$Graph$view(model.gridGraph))
 							])),
 						A2(
 						elm$html$Html$div,
