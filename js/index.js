@@ -5207,7 +5207,7 @@ var author$project$Main$init = function (_n0) {
 			author$project$Main$Model,
 			elm$core$Maybe$Nothing,
 			elm$core$Maybe$Nothing,
-			A2(author$project$Graph$initial, 20, 20)),
+			A2(author$project$Graph$initial, 50, 50)),
 		elm$core$Platform$Cmd$none);
 };
 var elm$core$Platform$Sub$batch = _Platform_batch;
