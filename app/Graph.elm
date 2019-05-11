@@ -5,6 +5,7 @@ import Html
 import Set
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Svg.Events exposing (onClick)
 
 
 type alias Model =
@@ -21,14 +22,20 @@ type Msg
 initial : Int -> Int -> Model
 initial x y =
     { vertex = Array.repeat x (Array.repeat y False)
-    , edgeR = Set.fromList [ ( 1, 3 ) ]
+    , edgeR = Set.empty
     , edgeC = Set.empty
     }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg graph =
-    ( graph, Cmd.none )
+update msg model =
+    case msg of
+        ChangeNode i j ->
+            if hasVertex i j model then
+                ( deleteVertex i j model, Cmd.none )
+
+            else
+                ( putVertex i j model, Cmd.none )
 
 
 view : Model -> Html.Html Msg
@@ -39,8 +46,8 @@ view model =
     in
     svg
         [ viewBox ("0 0 " ++ String.fromInt (xInd * 10) ++ " " ++ String.fromInt (yInd * 10)), class "svg_model" ]
-        [ viewVertex model
-        , viewEdge model
+        [ viewEdge model
+        , viewVertex model
         ]
 
 
@@ -186,7 +193,14 @@ calcVertex xInd column =
                     else
                         "nonactive"
             in
-            circle [ cx (indexToString xInd), cy (indexToString yInd), r "3", class className ] []
+            circle
+                [ cx (indexToString xInd)
+                , cy (indexToString yInd)
+                , r "3"
+                , class className
+                , onClick (ChangeNode xInd yInd)
+                ]
+                []
     in
     indexedMap func column
 
