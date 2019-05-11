@@ -31,7 +31,7 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model Nothing Nothing (Graph.initial 30 30), Cmd.none )
+    ( Model Nothing Nothing (Graph.initial 50 60), Cmd.none )
 
 
 type Msg

@@ -5194,7 +5194,7 @@ var author$project$Main$init = function (_n0) {
 			author$project$Main$Model,
 			elm$core$Maybe$Nothing,
 			elm$core$Maybe$Nothing,
-			A2(author$project$Graph$initial, 30, 30)),
+			A2(author$project$Graph$initial, 50, 60)),
 		elm$core$Platform$Cmd$none);
 };
 var elm$core$Platform$Sub$batch = _Platform_batch;
@@ -6422,15 +6422,8 @@ var author$project$Graph$viewVertex = function (model) {
 				elm$core$Array$toList,
 				elm$core$Array$toList(svgMsgArray))));
 };
-var elm$svg$Svg$rect = elm$svg$Svg$trustedNode('rect');
 var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
-var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
-var elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
-var elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
 var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
-var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
-var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
-var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
 var author$project$Graph$view = function (graph) {
 	var _n0 = author$project$Graph$getSize(graph);
 	var xInd = _n0.a;
@@ -6445,18 +6438,6 @@ var author$project$Graph$view = function (graph) {
 			]),
 		_List_fromArray(
 			[
-				A2(
-				elm$svg$Svg$rect,
-				_List_fromArray(
-					[
-						elm$svg$Svg$Attributes$x('10'),
-						elm$svg$Svg$Attributes$y('10'),
-						elm$svg$Svg$Attributes$width('100'),
-						elm$svg$Svg$Attributes$height('100'),
-						elm$svg$Svg$Attributes$rx('15'),
-						elm$svg$Svg$Attributes$ry('15')
-					]),
-				_List_Nil),
 				author$project$Graph$viewVertex(graph)
 			]));
 };

@@ -94,7 +94,6 @@ a:link, a:visited, a:hover, a:active{
 
 .svg_graph{
     width:500px;
-    height: 500px;
 }
 .vertex .active{
     fill: #d03c56;
