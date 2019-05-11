@@ -181,6 +181,11 @@ indexToString i =
     String.fromInt (i * 10 + 3)
 
 
+indexToRecString : Int -> String
+indexToRecString i =
+    String.fromInt (i * 10 - 2)
+
+
 calcVertex : Int -> Array Bool -> Array (Svg Msg)
 calcVertex xInd column =
     let
@@ -193,14 +198,24 @@ calcVertex xInd column =
                     else
                         "nonactive"
             in
-            circle
-                [ cx (indexToString xInd)
-                , cy (indexToString yInd)
-                , r "3"
-                , class className
-                , onClick (ChangeNode xInd yInd)
+            g []
+                [ circle
+                    [ cx (indexToString xInd)
+                    , cy (indexToString yInd)
+                    , r "3"
+                    , class className
+                    ]
+                    []
+                , rect
+                    [ onClick (ChangeNode xInd yInd)
+                    , x (indexToRecString xInd)
+                    , y (indexToRecString yInd)
+                    , width "10"
+                    , height "10"
+                    , class "hide"
+                    ]
+                    []
                 ]
-                []
     in
     indexedMap func column
 

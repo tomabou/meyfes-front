@@ -106,3 +106,6 @@ a:link, a:visited, a:hover, a:active{
     stroke: #d03c56;
     stroke-linecap: round;
 }
+.hide {
+    fill-opacity: 0;
+}

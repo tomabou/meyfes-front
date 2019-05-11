@@ -6569,6 +6569,9 @@ var author$project$Graph$ChangeNode = F2(
 	function (a, b) {
 		return {$: 'ChangeNode', a: a, b: b};
 	});
+var author$project$Graph$indexToRecString = function (i) {
+	return elm$core$String$fromInt((i * 10) - 2);
+};
 var elm$core$Elm$JsArray$foldl = _JsArray_foldl;
 var elm$core$Elm$JsArray$indexedMap = _JsArray_indexedMap;
 var elm$core$Array$indexedMap = F2(
@@ -6608,9 +6611,14 @@ var elm$core$Array$indexedMap = F2(
 			A3(elm$core$Elm$JsArray$foldl, helper, initialBuilder, tree));
 	});
 var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
+var elm$svg$Svg$rect = elm$svg$Svg$trustedNode('rect');
 var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
+var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
 var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
+var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
+var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
 var elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -6634,19 +6642,38 @@ var author$project$Graph$calcVertex = F2(
 			function (yInd, status) {
 				var className = status ? 'active' : 'nonactive';
 				return A2(
-					elm$svg$Svg$circle,
+					elm$svg$Svg$g,
+					_List_Nil,
 					_List_fromArray(
 						[
-							elm$svg$Svg$Attributes$cx(
-							author$project$Graph$indexToString(xInd)),
-							elm$svg$Svg$Attributes$cy(
-							author$project$Graph$indexToString(yInd)),
-							elm$svg$Svg$Attributes$r('3'),
-							elm$svg$Svg$Attributes$class(className),
-							elm$svg$Svg$Events$onClick(
-							A2(author$project$Graph$ChangeNode, xInd, yInd))
-						]),
-					_List_Nil);
+							A2(
+							elm$svg$Svg$circle,
+							_List_fromArray(
+								[
+									elm$svg$Svg$Attributes$cx(
+									author$project$Graph$indexToString(xInd)),
+									elm$svg$Svg$Attributes$cy(
+									author$project$Graph$indexToString(yInd)),
+									elm$svg$Svg$Attributes$r('3'),
+									elm$svg$Svg$Attributes$class(className)
+								]),
+							_List_Nil),
+							A2(
+							elm$svg$Svg$rect,
+							_List_fromArray(
+								[
+									elm$svg$Svg$Events$onClick(
+									A2(author$project$Graph$ChangeNode, xInd, yInd)),
+									elm$svg$Svg$Attributes$x(
+									author$project$Graph$indexToRecString(xInd)),
+									elm$svg$Svg$Attributes$y(
+									author$project$Graph$indexToRecString(yInd)),
+									elm$svg$Svg$Attributes$width('10'),
+									elm$svg$Svg$Attributes$height('10'),
+									elm$svg$Svg$Attributes$class('hide')
+								]),
+							_List_Nil)
+						]));
 			});
 		return A2(elm$core$Array$indexedMap, func, column);
 	});
