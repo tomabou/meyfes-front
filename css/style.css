@@ -109,3 +109,9 @@ a:link, a:visited, a:hover, a:active{
 .hide {
     fill-opacity: 0;
 }
+.maze_background {
+    fill: #333;
+}
+.maze .floor {
+    fill: #ddd;
+}

@@ -3,6 +3,7 @@ module Graph exposing (Model, Msg, initial, update, view)
 import Array exposing (..)
 import Constant exposing (..)
 import Html
+import Html.Events
 import Http
 import Json.Decode exposing (Decoder, array, field, int, list, map, map3)
 import Json.Encode
@@ -17,13 +18,21 @@ type alias Model =
     { vertex : Array (Array Bool)
     , edgeR : Set.Set ( Int, Int )
     , edgeC : Set.Set ( Int, Int )
+    , maze : Array (Array Int)
+    }
+
+
+type alias GraphInfo =
+    { vertex : Array (Array Bool)
+    , edgeR : Set.Set ( Int, Int )
+    , edgeC : Set.Set ( Int, Int )
     }
 
 
 type Msg
     = ChangeNode Int Int
     | SubmitGraph
-    | MazeCreated (Result Http.Error (Array (Array Bool)))
+    | MazeCreated (Result Http.Error (Array (Array Int)))
 
 
 intToPair : Int -> ( Int, Int )
@@ -31,17 +40,17 @@ intToPair x =
     ( x // 100, modBy 100 x )
 
 
-decoder : Decoder Model
+decoder : Decoder GraphInfo
 decoder =
-    Json.Decode.map3 Model
+    Json.Decode.map3 GraphInfo
         (field "vertex" (array (array (Json.Decode.map ((==) 1) int))))
         (field "edgeR" (Json.Decode.map Set.fromList (list (Json.Decode.map intToPair int))))
         (field "edgeC" (Json.Decode.map Set.fromList (list (Json.Decode.map intToPair int))))
 
 
-mazeDecoder : Decoder (Array (Array Bool))
+mazeDecoder : Decoder (Array (Array Int))
 mazeDecoder =
-    field "maze" (array (array (Json.Decode.map ((==) 1) int)))
+    field "mazelist" (array (array int))
 
 
 initial : Int -> Int -> Model
@@ -49,6 +58,7 @@ initial x y =
     { vertex = Array.repeat x (Array.repeat y False)
     , edgeR = Set.empty
     , edgeC = Set.empty
+    , maze = Array.empty
     }
 
 
@@ -66,16 +76,36 @@ update msg model =
             ( model
             , Http.post
                 { url = urlPrefix ++ "/maze"
-                , body = Http.jsonBody (Json.Encode.string "hoge")
+                , body =
+                    Http.jsonBody
+                        (Json.Encode.array
+                            (Json.Encode.array
+                                (Json.Encode.int
+                                    << (\b ->
+                                            if b then
+                                                0
+
+                                            else
+                                                1
+                                       )
+                                )
+                            )
+                            model.vertex
+                        )
                 , expect = Http.expectJson MazeCreated mazeDecoder
                 }
             )
 
-        MazeCreated _ ->
-            ( model, Cmd.none )
+        MazeCreated result ->
+            case result of
+                Ok arr ->
+                    ( { model | maze = arr }, Cmd.none )
+
+                Err err ->
+                    ( model, Cmd.none )
 
 
-viewMaze : Array (Array Bool) -> Html.Html Msg
+viewMaze : Array (Array Int) -> Html.Html Msg
 viewMaze arr =
     let
         ( i, j ) =
@@ -83,11 +113,12 @@ viewMaze arr =
     in
     svg
         [ viewBox ("0 0 " ++ String.fromInt (i * 10) ++ " " ++ String.fromInt (j * 10)), class "svg_model" ]
-        [ viewMazeWall arr
+        [ rect [ class "maze_background", x "0", y "0", width (String.fromInt (i * 10)), height (String.fromInt (j * 10)) ] []
+        , viewMazeWall arr
         ]
 
 
-viewMazeWall : Array (Array Bool) -> Svg Msg
+viewMazeWall : Array (Array Int) -> Svg Msg
 viewMazeWall maze =
     let
         svgMsgArray =
@@ -96,20 +127,20 @@ viewMazeWall maze =
     g [ class "maze" ] (List.concat (toList svgMsgArray))
 
 
-calcMaze : Int -> Array Bool -> List (Svg Msg)
+calcMaze : Int -> Array Int -> List (Svg Msg)
 calcMaze xInd column =
     let
         func yInd =
             rect
-                [ x (String.fromInt (xInd * 10))
-                , y (String.fromInt (yInd * 10))
-                , width "7"
-                , height "7"
+                [ x (String.fromInt (xInd * 10 - 1))
+                , y (String.fromInt (yInd * 10 - 1))
+                , width "12"
+                , height "12"
                 , class "floor"
                 ]
                 []
     in
-    toIndexedList column |> List.filter second |> List.map (first >> func)
+    toIndexedList column |> List.filter (second >> (==) 0) |> List.map (first >> func)
 
 
 view : Model -> Html.Html Msg
@@ -118,10 +149,14 @@ view model =
         ( xInd, yInd ) =
             getSize model
     in
-    svg
-        [ viewBox ("0 0 " ++ String.fromInt (xInd * 10) ++ " " ++ String.fromInt (yInd * 10)), class "svg_model" ]
-        [ viewEdge model
-        , viewVertex model
+    Html.div []
+        [ svg
+            [ viewBox ("0 0 " ++ String.fromInt (xInd * 10) ++ " " ++ String.fromInt (yInd * 10)), class "svg_model" ]
+            [ viewEdge model
+            , viewVertex model
+            ]
+        , Html.button [ Html.Events.onClick SubmitGraph ] [ Html.text "submit graph" ]
+        , viewMaze model.maze
         ]
 
 
@@ -224,7 +259,7 @@ deleteVertex i j model =
     { model | vertex = vertex, edgeC = edgeC2, edgeR = edgeR2 }
 
 
-getArrayArraySize : Array (Array Bool) -> ( Int, Int )
+getArrayArraySize : Array (Array a) -> ( Int, Int )
 getArrayArraySize arr =
     let
         xInd =

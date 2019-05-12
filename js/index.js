@@ -4691,11 +4691,11 @@ function _Browser_load(url)
 		}
 	}));
 }
-var elm$core$Array$branchFactor = 32;
 var elm$core$Array$Array_elm_builtin = F4(
 	function (a, b, c, d) {
 		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
 	});
+var elm$core$Array$branchFactor = 32;
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$GT = {$: 'GT'};
 var elm$core$Basics$LT = {$: 'LT'};
@@ -4966,6 +4966,7 @@ var author$project$Graph$initial = F2(
 		return {
 			edgeC: elm$core$Set$empty,
 			edgeR: elm$core$Set$empty,
+			maze: elm$core$Array$empty,
 			vertex: A2(
 				elm$core$Array$repeat,
 				x,
@@ -5786,16 +5787,11 @@ var author$project$Graph$deleteVertex = F3(
 var elm$json$Json$Decode$array = _Json_decodeArray;
 var elm$json$Json$Decode$field = _Json_decodeField;
 var elm$json$Json$Decode$int = _Json_decodeInt;
-var elm$json$Json$Decode$map = _Json_map1;
 var author$project$Graph$mazeDecoder = A2(
 	elm$json$Json$Decode$field,
-	'maze',
+	'mazelist',
 	elm$json$Json$Decode$array(
-		elm$json$Json$Decode$array(
-			A2(
-				elm$json$Json$Decode$map,
-				elm$core$Basics$eq(1),
-				elm$json$Json$Decode$int))));
+		elm$json$Json$Decode$array(elm$json$Json$Decode$int)));
 var elm$core$Basics$compare = _Utils_compare;
 var elm$core$Dict$insertHelp = F3(
 	function (key, value, dict) {
@@ -5885,6 +5881,11 @@ var author$project$Graph$putVertex = F3(
 		return _Utils_update(
 			model,
 			{edgeC: edgeC2, edgeR: edgeR2, vertex: vertex});
+	});
+var elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
 	});
 var elm$core$Result$mapError = F2(
 	function (f, result) {
@@ -6296,7 +6297,37 @@ var elm$http$Http$post = function (r) {
 	return elm$http$Http$request(
 		{body: r.body, expect: r.expect, headers: _List_Nil, method: 'POST', timeout: elm$core$Maybe$Nothing, tracker: elm$core$Maybe$Nothing, url: r.url});
 };
-var elm$json$Json$Encode$string = _Json_wrap;
+var elm$core$Elm$JsArray$foldl = _JsArray_foldl;
+var elm$core$Array$foldl = F3(
+	function (func, baseCase, _n0) {
+		var tree = _n0.c;
+		var tail = _n0.d;
+		var helper = F2(
+			function (node, acc) {
+				if (node.$ === 'SubTree') {
+					var subTree = node.a;
+					return A3(elm$core$Elm$JsArray$foldl, helper, acc, subTree);
+				} else {
+					var values = node.a;
+					return A3(elm$core$Elm$JsArray$foldl, func, acc, values);
+				}
+			});
+		return A3(
+			elm$core$Elm$JsArray$foldl,
+			func,
+			A3(elm$core$Elm$JsArray$foldl, helper, baseCase, tree),
+			tail);
+	});
+var elm$json$Json$Encode$array = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				elm$core$Array$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var elm$json$Json$Encode$int = _Json_wrap;
 var author$project$Graph$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -6314,12 +6345,32 @@ var author$project$Graph$update = F2(
 					elm$http$Http$post(
 						{
 							body: elm$http$Http$jsonBody(
-								elm$json$Json$Encode$string('hoge')),
+								A2(
+									elm$json$Json$Encode$array,
+									elm$json$Json$Encode$array(
+										A2(
+											elm$core$Basics$composeL,
+											elm$json$Json$Encode$int,
+											function (b) {
+												return b ? 0 : 1;
+											})),
+									model.vertex)),
 							expect: A2(elm$http$Http$expectJson, author$project$Graph$MazeCreated, author$project$Graph$mazeDecoder),
 							url: author$project$Constant$urlPrefix + '/maze'
 						}));
 			default:
-				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				var result = msg.a;
+				if (result.$ === 'Ok') {
+					var arr = result.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{maze: arr}),
+						elm$core$Platform$Cmd$none);
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+				}
 		}
 	});
 var author$project$Main$GotGraphMsg = function (a) {
@@ -6334,6 +6385,7 @@ var author$project$Main$ImageLoaded = function (a) {
 var author$project$Main$ImageSelected = function (a) {
 	return {$: 'ImageSelected', a: a};
 };
+var elm$json$Json$Decode$map = _Json_map1;
 var elm$json$Json$Decode$string = _Json_decodeString;
 var author$project$Main$imageDecoder = A2(
 	elm$json$Json$Decode$field,
@@ -6499,6 +6551,7 @@ var author$project$Main$update = F2(
 					A2(elm$core$Platform$Cmd$map, author$project$Main$GotGraphMsg, cmd));
 		}
 	});
+var author$project$Graph$SubmitGraph = {$: 'SubmitGraph'};
 var elm$core$Array$length = function (_n0) {
 	var len = _n0.a;
 	return len;
@@ -6611,14 +6664,73 @@ var author$project$Graph$viewEdge = function (model) {
 				author$project$Graph$calcEdgeR(model.edgeR)
 			]));
 };
-var author$project$Graph$ChangeNode = F2(
-	function (a, b) {
-		return {$: 'ChangeNode', a: a, b: b};
-	});
-var author$project$Graph$indexToRecString = function (i) {
-	return elm$core$String$fromInt((i * 10) - 2);
+var elm$core$Tuple$second = function (_n0) {
+	var y = _n0.b;
+	return y;
 };
-var elm$core$Elm$JsArray$foldl = _JsArray_foldl;
+var elm$core$Array$toIndexedList = function (array) {
+	var len = array.a;
+	var helper = F2(
+		function (entry, _n0) {
+			var index = _n0.a;
+			var list = _n0.b;
+			return _Utils_Tuple2(
+				index - 1,
+				A2(
+					elm$core$List$cons,
+					_Utils_Tuple2(index, entry),
+					list));
+		});
+	return A3(
+		elm$core$Array$foldr,
+		helper,
+		_Utils_Tuple2(len - 1, _List_Nil),
+		array).b;
+};
+var elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var elm$svg$Svg$rect = elm$svg$Svg$trustedNode('rect');
+var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
+var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
+var author$project$Graph$calcMaze = F2(
+	function (xInd, column) {
+		var func = function (yInd) {
+			return A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$x(
+						elm$core$String$fromInt((xInd * 10) - 1)),
+						elm$svg$Svg$Attributes$y(
+						elm$core$String$fromInt((yInd * 10) - 1)),
+						elm$svg$Svg$Attributes$width('12'),
+						elm$svg$Svg$Attributes$height('12'),
+						elm$svg$Svg$Attributes$class('floor')
+					]),
+				_List_Nil);
+		};
+		return A2(
+			elm$core$List$map,
+			A2(elm$core$Basics$composeR, elm$core$Tuple$first, func),
+			A2(
+				elm$core$List$filter,
+				A2(
+					elm$core$Basics$composeR,
+					elm$core$Tuple$second,
+					elm$core$Basics$eq(0)),
+				elm$core$Array$toIndexedList(column)));
+	});
 var elm$core$Elm$JsArray$indexedMap = _JsArray_indexedMap;
 var elm$core$Array$indexedMap = F2(
 	function (func, _n0) {
@@ -6656,15 +6768,71 @@ var elm$core$Array$indexedMap = F2(
 			true,
 			A3(elm$core$Elm$JsArray$foldl, helper, initialBuilder, tree));
 	});
+var elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
+		}
+	});
+var elm$core$List$concat = function (lists) {
+	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
+};
+var author$project$Graph$viewMazeWall = function (maze) {
+	var svgMsgArray = A2(elm$core$Array$indexedMap, author$project$Graph$calcMaze, maze);
+	return A2(
+		elm$svg$Svg$g,
+		_List_fromArray(
+			[
+				elm$svg$Svg$Attributes$class('maze')
+			]),
+		elm$core$List$concat(
+			elm$core$Array$toList(svgMsgArray)));
+};
+var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
+var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var author$project$Graph$viewMaze = function (arr) {
+	var _n0 = author$project$Graph$getArrayArraySize(arr);
+	var i = _n0.a;
+	var j = _n0.b;
+	return A2(
+		elm$svg$Svg$svg,
+		_List_fromArray(
+			[
+				elm$svg$Svg$Attributes$viewBox(
+				'0 0 ' + (elm$core$String$fromInt(i * 10) + (' ' + elm$core$String$fromInt(j * 10)))),
+				elm$svg$Svg$Attributes$class('svg_model')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				elm$svg$Svg$rect,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$class('maze_background'),
+						elm$svg$Svg$Attributes$x('0'),
+						elm$svg$Svg$Attributes$y('0'),
+						elm$svg$Svg$Attributes$width(
+						elm$core$String$fromInt(i * 10)),
+						elm$svg$Svg$Attributes$height(
+						elm$core$String$fromInt(j * 10))
+					]),
+				_List_Nil),
+				author$project$Graph$viewMazeWall(arr)
+			]));
+};
+var author$project$Graph$ChangeNode = F2(
+	function (a, b) {
+		return {$: 'ChangeNode', a: a, b: b};
+	});
+var author$project$Graph$indexToRecString = function (i) {
+	return elm$core$String$fromInt((i * 10) - 2);
+};
 var elm$svg$Svg$circle = elm$svg$Svg$trustedNode('circle');
-var elm$svg$Svg$rect = elm$svg$Svg$trustedNode('rect');
 var elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
-var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
 var elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
-var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
-var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
-var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
 var elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -6723,17 +6891,6 @@ var author$project$Graph$calcVertex = F2(
 			});
 		return A2(elm$core$Array$indexedMap, func, column);
 	});
-var elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
-		}
-	});
-var elm$core$List$concat = function (lists) {
-	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
-};
 var author$project$Graph$viewVertex = function (model) {
 	var svgMsgArray = A2(elm$core$Array$indexedMap, author$project$Graph$calcVertex, model.vertex);
 	return A2(
@@ -6748,30 +6905,54 @@ var author$project$Graph$viewVertex = function (model) {
 				elm$core$Array$toList,
 				elm$core$Array$toList(svgMsgArray))));
 };
-var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
-var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var elm$html$Html$button = _VirtualDom_node('button');
+var elm$html$Html$div = _VirtualDom_node('div');
+var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
+var elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		elm$html$Html$Events$on,
+		'click',
+		elm$json$Json$Decode$succeed(msg));
+};
 var author$project$Graph$view = function (model) {
 	var _n0 = author$project$Graph$getSize(model);
 	var xInd = _n0.a;
 	var yInd = _n0.b;
 	return A2(
-		elm$svg$Svg$svg,
+		elm$html$Html$div,
+		_List_Nil,
 		_List_fromArray(
 			[
-				elm$svg$Svg$Attributes$viewBox(
-				'0 0 ' + (elm$core$String$fromInt(xInd * 10) + (' ' + elm$core$String$fromInt(yInd * 10)))),
-				elm$svg$Svg$Attributes$class('svg_model')
-			]),
-		_List_fromArray(
-			[
-				author$project$Graph$viewEdge(model),
-				author$project$Graph$viewVertex(model)
+				A2(
+				elm$svg$Svg$svg,
+				_List_fromArray(
+					[
+						elm$svg$Svg$Attributes$viewBox(
+						'0 0 ' + (elm$core$String$fromInt(xInd * 10) + (' ' + elm$core$String$fromInt(yInd * 10)))),
+						elm$svg$Svg$Attributes$class('svg_model')
+					]),
+				_List_fromArray(
+					[
+						author$project$Graph$viewEdge(model),
+						author$project$Graph$viewVertex(model)
+					])),
+				A2(
+				elm$html$Html$button,
+				_List_fromArray(
+					[
+						elm$html$Html$Events$onClick(author$project$Graph$SubmitGraph)
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('submit graph')
+					])),
+				author$project$Graph$viewMaze(model.maze)
 			]));
 };
 var elm$html$Html$h1 = _VirtualDom_node('h1');
 var elm$html$Html$header = _VirtualDom_node('header');
-var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
+var elm$json$Json$Encode$string = _Json_wrap;
 var elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
 		return A2(
@@ -6837,14 +7018,6 @@ var author$project$Main$viewConverted = function (model) {
 				]),
 			_List_Nil);
 	}
-};
-var elm$html$Html$button = _VirtualDom_node('button');
-var elm$html$Html$div = _VirtualDom_node('div');
-var elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		elm$html$Html$Events$on,
-		'click',
-		elm$json$Json$Decode$succeed(msg));
 };
 var author$project$Main$viewImage = function (model) {
 	var _n0 = model.image;
