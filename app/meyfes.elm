@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Array
 import Browser
+import Constant exposing (..)
 import File exposing (File)
 import File.Select as Select
 import Graph
@@ -54,7 +55,7 @@ update msg model =
                 [ Task.perform ImageLoaded
                     (File.toUrl file)
                 , Http.post
-                    { url = "https://tomabou.com"
+                    { url = urlPrefix
                     , body = Http.multipartBody [ Http.filePart "image" file ]
                     , expect = Http.expectJson ImageConverted imageDecoder
                     }
@@ -82,7 +83,7 @@ update msg model =
 
 imageDecoder : Decoder String
 imageDecoder =
-    field "image_url" string
+    field "image_url" (Json.Decode.map ((++) urlPrefix) string)
 
 
 view : Model -> Html Msg
@@ -103,7 +104,7 @@ view model =
 viewHeader : Model -> Html Msg
 viewHeader model =
     header [ class "header" ]
-        [ h1 [ class "logo", href "https://tomabou.com" ]
+        [ h1 [ class "logo", href urlPrefix ]
             [ text "image uploader"
             ]
         ]
