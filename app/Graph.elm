@@ -1,6 +1,7 @@
-module Graph exposing (Model, Msg, initial, update, view)
+module Graph exposing (Model, Msg, initial, subscriptions, update, view)
 
 import Array exposing (..)
+import Browser.Events
 import Constant exposing (..)
 import Html
 import Html.Events
@@ -19,6 +20,8 @@ type alias Model =
     , edgeR : Set.Set ( Int, Int )
     , edgeC : Set.Set ( Int, Int )
     , maze : Array (Array Int)
+    , routeRatio : Float
+    , routeDistance : Int
     }
 
 
@@ -33,6 +36,7 @@ type Msg
     = ChangeNode Int Int
     | SubmitGraph
     | MazeCreated (Result Http.Error (Array (Array Int)))
+    | AnimeFrame Float
 
 
 intToPair : Int -> ( Int, Int )
@@ -59,6 +63,8 @@ initial x y =
     , edgeR = Set.empty
     , edgeC = Set.empty
     , maze = Array.empty
+    , routeRatio = 0
+    , routeDistance = 0
     }
 
 
@@ -99,38 +105,59 @@ update msg model =
         MazeCreated result ->
             case result of
                 Ok arr ->
-                    ( { model | maze = arr }, Cmd.none )
+                    let
+                        routesize =
+                            foldl Basics.max 0 (Array.map (foldl Basics.max 0) arr) + 2
+                    in
+                    ( { model | maze = arr, routeDistance = routesize * 6 // 5 }, Cmd.none )
 
                 Err err ->
                     ( model, Cmd.none )
 
+        AnimeFrame time ->
+            let
+                newTime =
+                    model.routeRatio + time / 5000
 
-viewMaze : Array (Array Int) -> Html.Html Msg
-viewMaze arr =
+                newRatio =
+                    newTime - toFloat (floor newTime)
+            in
+            ( { model | routeRatio = newRatio }, Cmd.none )
+
+
+viewMaze : Model -> Html.Html Msg
+viewMaze model =
     let
         ( i, j ) =
-            getArrayArraySize arr
+            getArrayArraySize model.maze
     in
     svg
         [ viewBox ("0 0 " ++ String.fromInt (i * 10) ++ " " ++ String.fromInt (j * 10)), class "svg_model" ]
         [ rect [ class "maze_background", x "0", y "0", width (String.fromInt (i * 10)), height (String.fromInt (j * 10)) ] []
-        , viewMazeWall arr
+        , viewMazeWall model
         ]
 
 
-viewMazeWall : Array (Array Int) -> Svg Msg
-viewMazeWall maze =
+viewMazeWall : Model -> Svg Msg
+viewMazeWall model =
     let
+        threshold =
+            floor (toFloat model.routeDistance * model.routeRatio)
+
         svgMsgArray =
-            indexedMap calcMaze maze
+            indexedMap (floorMaze threshold) model.maze
     in
-    g [ class "maze" ] (List.concat (toList svgMsgArray))
+    g [ class "maze" ]
+        [ g [] (List.concat (toList (indexedMap (floorMaze threshold) model.maze)))
+        , g [] (List.concat (toList (indexedMap (unreachMaze threshold) model.maze)))
+        , g [] (List.concat (toList (indexedMap (reachMaze threshold) model.maze)))
+        ]
 
 
-calcMaze : Int -> Array Int -> List (Svg Msg)
-calcMaze xInd column =
+floorMaze : Int -> Int -> Array Int -> List (Svg Msg)
+floorMaze threshold xInd column =
     let
-        func yInd =
+        func ( yInd, val ) =
             rect
                 [ x (String.fromInt (xInd * 10 - 1))
                 , y (String.fromInt (yInd * 10 - 1))
@@ -140,7 +167,39 @@ calcMaze xInd column =
                 ]
                 []
     in
-    toIndexedList column |> List.filter (second >> (==) 0) |> List.map (first >> func)
+    toIndexedList column |> List.filter (second >> (==) 0) |> List.map func
+
+
+reachMaze : Int -> Int -> Array Int -> List (Svg Msg)
+reachMaze threshold xInd column =
+    let
+        func ( yInd, val ) =
+            rect
+                [ x (String.fromInt (xInd * 10 - 1))
+                , y (String.fromInt (yInd * 10 - 1))
+                , width "12"
+                , height "12"
+                , class "reach-floor"
+                ]
+                []
+    in
+    toIndexedList column |> List.filter (second >> (\i -> i >= 2 && i < threshold)) |> List.map func
+
+
+unreachMaze : Int -> Int -> Array Int -> List (Svg Msg)
+unreachMaze threshold xInd column =
+    let
+        func ( yInd, val ) =
+            rect
+                [ x (String.fromInt (xInd * 10 - 1))
+                , y (String.fromInt (yInd * 10 - 1))
+                , width "12"
+                , height "12"
+                , class "unreach-floor"
+                ]
+                []
+    in
+    toIndexedList column |> List.filter (second >> (\i -> i >= threshold)) |> List.map func
 
 
 view : Model -> Html.Html Msg
@@ -156,7 +215,7 @@ view model =
             , viewVertex model
             ]
         , Html.button [ Html.Events.onClick SubmitGraph ] [ Html.text "submit graph" ]
-        , viewMaze model.maze
+        , viewMaze model
         ]
 
 
@@ -369,3 +428,8 @@ calcEdgeR set =
     in
     g []
         (List.map func (Set.toList set))
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Browser.Events.onAnimationFrameDelta AnimeFrame

@@ -93,7 +93,7 @@ a:link, a:visited, a:hover, a:active{
 }
 
 .svg_model{
-    width:500px;
+    width:970px;
 }
 .vertex .active{
     fill: #d03c56;
@@ -114,4 +114,10 @@ a:link, a:visited, a:hover, a:active{
 }
 .maze .floor {
     fill: #ddd;
+}
+.maze .unreach-floor {
+    fill: #ddd;
+}
+.maze .reach-floor {
+    fill: #d03c56;
 }

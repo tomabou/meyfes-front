@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Array
 import Browser
+import Browser.Events
 import Constant exposing (..)
 import File exposing (File)
 import File.Select as Select
@@ -32,7 +33,7 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model Nothing Nothing (Graph.initial 20 20), Cmd.none )
+    ( Model Nothing Nothing (Graph.initial 30 20), Cmd.none )
 
 
 type Msg
@@ -139,4 +140,4 @@ viewConverted model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Sub.map GotGraphMsg (Graph.subscriptions model.gridGraph)
