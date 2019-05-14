@@ -5673,7 +5673,7 @@ var author$project$Main$subscriptions = function (model) {
 		author$project$Main$GotGraphMsg,
 		author$project$Graph$subscriptions(model.gridGraph));
 };
-var author$project$Constant$urlPrefix = 'http://localhost:5000';
+var author$project$Constant$urlPrefix = 'https://tomabou.com';
 var author$project$Graph$MazeCreated = function (a) {
 	return {$: 'MazeCreated', a: a};
 };
