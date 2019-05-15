@@ -24,16 +24,22 @@ main =
         }
 
 
+type State
+    = NotYet
+    | Processing
+    | Done
+
+
 type alias Model =
     { image : Maybe String
-    , convertedImage : Maybe String
     , gridGraph : Graph.Model
+    , converteState : State
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model Nothing Nothing (Graph.initial 30 20), Cmd.none )
+    ( Model Nothing (Graph.initial 30 20) NotYet, Cmd.none )
 
 
 type Msg
@@ -64,7 +70,7 @@ update msg model =
             )
 
         ImageLoaded url ->
-            ( { model | image = Just url }, Cmd.none )
+            ( { model | image = Just url, converteState = Processing }, Cmd.none )
 
         ImageConverted res ->
             case res of
@@ -76,7 +82,7 @@ update msg model =
                         newGraph =
                             { oldGraph | vertex = graph.vertex, edgeR = graph.edgeR, edgeC = graph.edgeC }
                     in
-                    ( { model | gridGraph = newGraph }, Cmd.none )
+                    ( { model | gridGraph = newGraph, converteState = Done }, Cmd.none )
 
                 Err err ->
                     ( model, Cmd.none )
@@ -101,6 +107,7 @@ view model =
         , div [ class "wrapper", class "clearfix" ]
             [ main_ [ class "main" ]
                 [ viewImage model
+                , viewConverted model
                 , Html.map GotGraphMsg (Graph.view model.gridGraph)
                 ]
             , div [ class "sidemenu" ] []
@@ -122,31 +129,49 @@ viewImage : Model -> Html Msg
 viewImage model =
     case model.image of
         Nothing ->
+            div [] []
+
+        Just url ->
+            div []
+                [ img [ src url, width 200 ] []
+                ]
+
+
+viewConverted : Model -> Html Msg
+viewConverted model =
+    case model.converteState of
+        NotYet ->
             button
                 [ onClick ImageRequested
                 , class "button1"
                 ]
                 [ text "Load Image" ]
 
-        Just url ->
+        Processing ->
             div []
-                [ img [ src url, width 200 ] []
-                , viewConverted model
+                [ text "converting"
+                , button
+                    [ onClick ImageRequested
+                    , class "button1"
+                    ]
+                    [ text "Reupload Image" ]
                 ]
 
-
-viewConverted : Model -> Html Msg
-viewConverted model =
-    case model.convertedImage of
-        Nothing ->
-            text "converting"
-
-        Just url ->
-            img [ src url, width 200 ] []
+        Done ->
+            div []
+                [ text "finish!!"
+                , button
+                    [ onClick ImageRequested
+                    , class "button1"
+                    ]
+                    [ text "Reupload Image" ]
+                ]
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
---    Sub.map GotGraphMsg (Graph.subscriptions model.gridGraph)
 
+
+
+--    Sub.map GotGraphMsg (Graph.subscriptions model.gridGraph)

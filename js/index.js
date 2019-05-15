@@ -4977,9 +4977,10 @@ var author$project$Graph$initial = F2(
 		};
 	});
 var author$project$Main$Model = F3(
-	function (image, convertedImage, gridGraph) {
-		return {convertedImage: convertedImage, gridGraph: gridGraph, image: image};
+	function (image, gridGraph, converteState) {
+		return {converteState: converteState, gridGraph: gridGraph, image: image};
 	});
+var author$project$Main$NotYet = {$: 'NotYet'};
 var elm$core$Maybe$Nothing = {$: 'Nothing'};
 var elm$core$Basics$True = {$: 'True'};
 var elm$core$Result$isOk = function (result) {
@@ -5210,8 +5211,8 @@ var author$project$Main$init = function (_n0) {
 		A3(
 			author$project$Main$Model,
 			elm$core$Maybe$Nothing,
-			elm$core$Maybe$Nothing,
-			A2(author$project$Graph$initial, 30, 20)),
+			A2(author$project$Graph$initial, 30, 20),
+			author$project$Main$NotYet),
 		elm$core$Platform$Cmd$none);
 };
 var elm$core$Platform$Sub$batch = _Platform_batch;
@@ -6465,6 +6466,7 @@ var author$project$Graph$update = F2(
 					elm$core$Platform$Cmd$none);
 		}
 	});
+var author$project$Main$Done = {$: 'Done'};
 var author$project$Main$GotGraphMsg = function (a) {
 	return {$: 'GotGraphMsg', a: a};
 };
@@ -6477,6 +6479,7 @@ var author$project$Main$ImageLoaded = function (a) {
 var author$project$Main$ImageSelected = function (a) {
 	return {$: 'ImageSelected', a: a};
 };
+var author$project$Main$Processing = {$: 'Processing'};
 var elm$core$Platform$Cmd$map = _Platform_map;
 var elm$core$Task$Perform = function (a) {
 	return {$: 'Perform', a: a};
@@ -6604,6 +6607,7 @@ var author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
+							converteState: author$project$Main$Processing,
 							image: elm$core$Maybe$Just(url)
 						}),
 					elm$core$Platform$Cmd$none);
@@ -6618,7 +6622,7 @@ var author$project$Main$update = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{gridGraph: newGraph}),
+							{converteState: author$project$Main$Done, gridGraph: newGraph}),
 						elm$core$Platform$Cmd$none);
 				} else {
 					var err = res.a;
@@ -7145,8 +7149,7 @@ var author$project$Graph$view = function (model) {
 					]))
 			]));
 };
-var elm$html$Html$h1 = _VirtualDom_node('h1');
-var elm$html$Html$header = _VirtualDom_node('header');
+var author$project$Main$ImageRequested = {$: 'ImageRequested'};
 var elm$json$Json$Encode$string = _Json_wrap;
 var elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -7156,6 +7159,63 @@ var elm$html$Html$Attributes$stringProperty = F2(
 			elm$json$Json$Encode$string(string));
 	});
 var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
+var author$project$Main$viewConverted = function (model) {
+	var _n0 = model.converteState;
+	switch (_n0.$) {
+		case 'NotYet':
+			return A2(
+				elm$html$Html$button,
+				_List_fromArray(
+					[
+						elm$html$Html$Events$onClick(author$project$Main$ImageRequested),
+						elm$html$Html$Attributes$class('button1')
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('Load Image')
+					]));
+		case 'Processing':
+			return A2(
+				elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text('converting'),
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Events$onClick(author$project$Main$ImageRequested),
+								elm$html$Html$Attributes$class('button1')
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('Reupload Image')
+							]))
+					]));
+		default:
+			return A2(
+				elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$text('finish!!'),
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Events$onClick(author$project$Main$ImageRequested),
+								elm$html$Html$Attributes$class('button1')
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('Reupload Image')
+							]))
+					]));
+	}
+};
+var elm$html$Html$h1 = _VirtualDom_node('h1');
+var elm$html$Html$header = _VirtualDom_node('header');
 var elm$html$Html$Attributes$href = function (url) {
 	return A2(
 		elm$html$Html$Attributes$stringProperty,
@@ -7184,7 +7244,6 @@ var author$project$Main$viewHeader = function (model) {
 					]))
 			]));
 };
-var author$project$Main$ImageRequested = {$: 'ImageRequested'};
 var elm$html$Html$img = _VirtualDom_node('img');
 var elm$html$Html$Attributes$src = function (url) {
 	return A2(
@@ -7198,36 +7257,10 @@ var elm$html$Html$Attributes$width = function (n) {
 		'width',
 		elm$core$String$fromInt(n));
 };
-var author$project$Main$viewConverted = function (model) {
-	var _n0 = model.convertedImage;
-	if (_n0.$ === 'Nothing') {
-		return elm$html$Html$text('converting');
-	} else {
-		var url = _n0.a;
-		return A2(
-			elm$html$Html$img,
-			_List_fromArray(
-				[
-					elm$html$Html$Attributes$src(url),
-					elm$html$Html$Attributes$width(200)
-				]),
-			_List_Nil);
-	}
-};
 var author$project$Main$viewImage = function (model) {
 	var _n0 = model.image;
 	if (_n0.$ === 'Nothing') {
-		return A2(
-			elm$html$Html$button,
-			_List_fromArray(
-				[
-					elm$html$Html$Events$onClick(author$project$Main$ImageRequested),
-					elm$html$Html$Attributes$class('button1')
-				]),
-			_List_fromArray(
-				[
-					elm$html$Html$text('Load Image')
-				]));
+		return A2(elm$html$Html$div, _List_Nil, _List_Nil);
 	} else {
 		var url = _n0.a;
 		return A2(
@@ -7242,8 +7275,7 @@ var author$project$Main$viewImage = function (model) {
 							elm$html$Html$Attributes$src(url),
 							elm$html$Html$Attributes$width(200)
 						]),
-					_List_Nil),
-					author$project$Main$viewConverted(model)
+					_List_Nil)
 				]));
 	}
 };
@@ -7276,6 +7308,7 @@ var author$project$Main$view = function (model) {
 						_List_fromArray(
 							[
 								author$project$Main$viewImage(model),
+								author$project$Main$viewConverted(model),
 								A2(
 								elm$html$Html$map,
 								author$project$Main$GotGraphMsg,
