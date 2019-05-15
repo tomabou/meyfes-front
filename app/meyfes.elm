@@ -40,7 +40,7 @@ type Msg
     = ImageRequested
     | ImageSelected File
     | ImageLoaded String
-    | ImageConverted (Result Http.Error String)
+    | ImageConverted (Result Http.Error Graph.GraphInfo)
     | GotGraphMsg Graph.Msg
 
 
@@ -58,7 +58,7 @@ update msg model =
                 , Http.post
                     { url = urlPrefix
                     , body = Http.multipartBody [ Http.filePart "image" file ]
-                    , expect = Http.expectJson ImageConverted imageDecoder
+                    , expect = Http.expectJson ImageConverted Graph.decoder
                     }
                 ]
             )
@@ -68,8 +68,15 @@ update msg model =
 
         ImageConverted res ->
             case res of
-                Ok url ->
-                    ( { model | convertedImage = Just url }, Cmd.none )
+                Ok graph ->
+                    let
+                        oldGraph =
+                            model.gridGraph
+
+                        newGraph =
+                            { oldGraph | vertex = graph.vertex, edgeR = graph.edgeR, edgeC = graph.edgeC }
+                    in
+                    ( { model | gridGraph = newGraph }, Cmd.none )
 
                 Err err ->
                     ( model, Cmd.none )
@@ -140,4 +147,6 @@ viewConverted model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map GotGraphMsg (Graph.subscriptions model.gridGraph)
+    Sub.none
+--    Sub.map GotGraphMsg (Graph.subscriptions model.gridGraph)
+

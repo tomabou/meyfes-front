@@ -1,4 +1,4 @@
-module Graph exposing (Model, Msg, initial, subscriptions, update, view)
+module Graph exposing (GraphInfo, Model, Msg, decoder, initial, subscriptions, update, view)
 
 import Array exposing (..)
 import Browser.Events
@@ -22,6 +22,7 @@ type alias Model =
     , maze : Array (Array Int)
     , routeRatio : Float
     , routeDistance : Int
+    , showRoute : Bool
     }
 
 
@@ -37,11 +38,12 @@ type Msg
     | SubmitGraph
     | MazeCreated (Result Http.Error (Array (Array Int)))
     | AnimeFrame Float
+    | ShowRoute
 
 
 intToPair : Int -> ( Int, Int )
 intToPair x =
-    ( x // 100, modBy 100 x )
+    ( x // 1000, modBy 1000 x )
 
 
 decoder : Decoder GraphInfo
@@ -65,6 +67,7 @@ initial x y =
     , maze = Array.empty
     , routeRatio = 0
     , routeDistance = 0
+    , showRoute = False
     }
 
 
@@ -122,7 +125,11 @@ update msg model =
                 newRatio =
                     newTime - toFloat (floor newTime)
             in
-            ( { model | routeRatio = newRatio }, Cmd.none )
+            --            ( { model | routeRatio = newRatio }, Cmd.none )
+            ( model, Cmd.none )
+
+        ShowRoute ->
+            ( { model | routeRatio = 1 - model.routeRatio, showRoute = not model.showRoute }, Cmd.none )
 
 
 viewMaze : Model -> Html.Html Msg
@@ -142,7 +149,7 @@ viewMazeWall : Model -> Svg Msg
 viewMazeWall model =
     let
         threshold =
-            floor (toFloat model.routeDistance * model.routeRatio)
+            floor (toFloat model.routeDistance * model.routeRatio) + 2
 
         svgMsgArray =
             indexedMap (floorMaze threshold) model.maze
@@ -216,6 +223,15 @@ view model =
             ]
         , Html.button [ Html.Events.onClick SubmitGraph ] [ Html.text "submit graph" ]
         , viewMaze model
+        , Html.button [ Html.Events.onClick ShowRoute ]
+            [ Html.text
+                (if model.showRoute then
+                    "hide answer"
+
+                 else
+                    "show answer"
+                )
+            ]
         ]
 
 
