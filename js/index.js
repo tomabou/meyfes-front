@@ -5220,7 +5220,7 @@ var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
 var author$project$Main$subscriptions = function (model) {
 	return elm$core$Platform$Sub$none;
 };
-var author$project$Constant$urlPrefix = 'https://tomabou.com';
+var author$project$Constant$urlPrefix = 'http://localhost:5000';
 var author$project$Graph$GraphInfo = F3(
 	function (vertex, edgeR, edgeC) {
 		return {edgeC: edgeC, edgeR: edgeR, vertex: vertex};
@@ -6740,6 +6740,8 @@ var author$project$Graph$calcEdgeR = function (set) {
 			func,
 			elm$core$Set$toList(set)));
 };
+var elm$virtual_dom$VirtualDom$lazy = _VirtualDom_lazy;
+var elm$html$Html$Lazy$lazy = elm$virtual_dom$VirtualDom$lazy;
 var elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
 var author$project$Graph$viewEdge = function (model) {
 	return A2(
@@ -6750,8 +6752,8 @@ var author$project$Graph$viewEdge = function (model) {
 			]),
 		_List_fromArray(
 			[
-				author$project$Graph$calcEdgeC(model.edgeC),
-				author$project$Graph$calcEdgeR(model.edgeR)
+				A2(elm$html$Html$Lazy$lazy, author$project$Graph$calcEdgeC, model.edgeC),
+				A2(elm$html$Html$Lazy$lazy, author$project$Graph$calcEdgeR, model.edgeR)
 			]));
 };
 var elm$core$Tuple$second = function (_n0) {
@@ -6793,8 +6795,8 @@ var elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
 var elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
 var elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
 var elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
-var author$project$Graph$floorMaze = F3(
-	function (threshold, xInd, column) {
+var author$project$Graph$floorMaze = F2(
+	function (xInd, column) {
 		var func = function (_n0) {
 			var yInd = _n0.a;
 			var val = _n0.b;
@@ -6812,16 +6814,19 @@ var author$project$Graph$floorMaze = F3(
 					]),
 				_List_Nil);
 		};
-		return A2(
-			elm$core$List$map,
-			func,
+		return function (x) {
+			return A2(elm$svg$Svg$g, _List_Nil, x);
+		}(
 			A2(
-				elm$core$List$filter,
+				elm$core$List$map,
+				func,
 				A2(
-					elm$core$Basics$composeR,
-					elm$core$Tuple$second,
-					elm$core$Basics$eq(0)),
-				elm$core$Array$toIndexedList(column)));
+					elm$core$List$filter,
+					A2(
+						elm$core$Basics$composeR,
+						elm$core$Tuple$second,
+						elm$core$Basics$eq(0)),
+					elm$core$Array$toIndexedList(column))));
 	});
 var author$project$Graph$reachMaze = F3(
 	function (threshold, xInd, column) {
@@ -6842,18 +6847,21 @@ var author$project$Graph$reachMaze = F3(
 					]),
 				_List_Nil);
 		};
-		return A2(
-			elm$core$List$map,
-			func,
+		return function (x) {
+			return A2(elm$svg$Svg$g, _List_Nil, x);
+		}(
 			A2(
-				elm$core$List$filter,
+				elm$core$List$map,
+				func,
 				A2(
-					elm$core$Basics$composeR,
-					elm$core$Tuple$second,
-					function (i) {
-						return (i >= 2) && (_Utils_cmp(i, threshold) < 0);
-					}),
-				elm$core$Array$toIndexedList(column)));
+					elm$core$List$filter,
+					A2(
+						elm$core$Basics$composeR,
+						elm$core$Tuple$second,
+						function (i) {
+							return (i >= 2) && (_Utils_cmp(i, threshold) < 0);
+						}),
+					elm$core$Array$toIndexedList(column))));
 	});
 var author$project$Graph$unreachMaze = F3(
 	function (threshold, xInd, column) {
@@ -6874,18 +6882,21 @@ var author$project$Graph$unreachMaze = F3(
 					]),
 				_List_Nil);
 		};
-		return A2(
-			elm$core$List$map,
-			func,
+		return function (x) {
+			return A2(elm$svg$Svg$g, _List_Nil, x);
+		}(
 			A2(
-				elm$core$List$filter,
+				elm$core$List$map,
+				func,
 				A2(
-					elm$core$Basics$composeR,
-					elm$core$Tuple$second,
-					function (i) {
-						return _Utils_cmp(i, threshold) > -1;
-					}),
-				elm$core$Array$toIndexedList(column)));
+					elm$core$List$filter,
+					A2(
+						elm$core$Basics$composeR,
+						elm$core$Tuple$second,
+						function (i) {
+							return _Utils_cmp(i, threshold) > -1;
+						}),
+					elm$core$Array$toIndexedList(column))));
 	});
 var elm$core$Elm$JsArray$indexedMap = _JsArray_indexedMap;
 var elm$core$Array$indexedMap = F2(
@@ -6924,63 +6935,48 @@ var elm$core$Array$indexedMap = F2(
 			true,
 			A3(elm$core$Elm$JsArray$foldl, helper, initialBuilder, tree));
 	});
-var elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3(elm$core$List$foldr, elm$core$List$cons, ys, xs);
-		}
-	});
-var elm$core$List$concat = function (lists) {
-	return A3(elm$core$List$foldr, elm$core$List$append, _List_Nil, lists);
-};
-var author$project$Graph$viewMazeWall = function (model) {
-	var threshold = elm$core$Basics$floor(model.routeDistance * model.routeRatio) + 2;
-	var svgMsgArray = A2(
-		elm$core$Array$indexedMap,
-		author$project$Graph$floorMaze(threshold),
-		model.maze);
-	return A2(
-		elm$svg$Svg$g,
-		_List_fromArray(
-			[
-				elm$svg$Svg$Attributes$class('maze')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				elm$svg$Svg$g,
-				_List_Nil,
-				elm$core$List$concat(
+var elm$virtual_dom$VirtualDom$lazy2 = _VirtualDom_lazy2;
+var elm$svg$Svg$Lazy$lazy2 = elm$virtual_dom$VirtualDom$lazy2;
+var author$project$Graph$viewMazeWall = F2(
+	function (maze, threshold) {
+		return A2(
+			elm$svg$Svg$g,
+			_List_fromArray(
+				[
+					elm$svg$Svg$Attributes$class('maze')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					elm$svg$Svg$g,
+					_List_Nil,
 					elm$core$Array$toList(
 						A2(
 							elm$core$Array$indexedMap,
-							author$project$Graph$floorMaze(threshold),
-							model.maze)))),
-				A2(
-				elm$svg$Svg$g,
-				_List_Nil,
-				elm$core$List$concat(
+							elm$svg$Svg$Lazy$lazy2(author$project$Graph$floorMaze),
+							maze))),
+					A2(
+					elm$svg$Svg$g,
+					_List_Nil,
 					elm$core$Array$toList(
 						A2(
 							elm$core$Array$indexedMap,
 							author$project$Graph$unreachMaze(threshold),
-							model.maze)))),
-				A2(
-				elm$svg$Svg$g,
-				_List_Nil,
-				elm$core$List$concat(
+							maze))),
+					A2(
+					elm$svg$Svg$g,
+					_List_Nil,
 					elm$core$Array$toList(
 						A2(
 							elm$core$Array$indexedMap,
 							author$project$Graph$reachMaze(threshold),
-							model.maze))))
-			]));
-};
+							maze)))
+				]));
+	});
 var elm$svg$Svg$svg = elm$svg$Svg$trustedNode('svg');
 var elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
 var author$project$Graph$viewMaze = function (model) {
+	var threshold = elm$core$Basics$floor(model.routeDistance * model.routeRatio) + 2;
 	var _n0 = author$project$Graph$getArrayArraySize(model.maze);
 	var i = _n0.a;
 	var j = _n0.b;
@@ -7007,7 +7003,7 @@ var author$project$Graph$viewMaze = function (model) {
 						elm$core$String$fromInt(j * 10))
 					]),
 				_List_Nil),
-				author$project$Graph$viewMazeWall(model)
+				A3(elm$svg$Svg$Lazy$lazy2, author$project$Graph$viewMazeWall, model.maze, threshold)
 			]));
 };
 var author$project$Graph$ChangeNode = F2(
@@ -7077,21 +7073,27 @@ var author$project$Graph$calcVertex = F2(
 							_List_Nil)
 						]));
 			});
-		return A2(elm$core$Array$indexedMap, func, column);
+		return A2(
+			elm$svg$Svg$g,
+			_List_Nil,
+			elm$core$Array$toList(
+				A2(
+					elm$core$Array$indexedMap,
+					elm$svg$Svg$Lazy$lazy2(func),
+					column)));
 	});
-var author$project$Graph$viewVertex = function (model) {
-	var svgMsgArray = A2(elm$core$Array$indexedMap, author$project$Graph$calcVertex, model.vertex);
+var author$project$Graph$viewVertex = function (vertex) {
+	var svgMsgArray = A2(
+		elm$core$Array$indexedMap,
+		elm$svg$Svg$Lazy$lazy2(author$project$Graph$calcVertex),
+		vertex);
 	return A2(
 		elm$svg$Svg$g,
 		_List_fromArray(
 			[
 				elm$svg$Svg$Attributes$class('vertex')
 			]),
-		elm$core$List$concat(
-			A2(
-				elm$core$List$map,
-				elm$core$Array$toList,
-				elm$core$Array$toList(svgMsgArray))));
+		elm$core$Array$toList(svgMsgArray));
 };
 var elm$html$Html$button = _VirtualDom_node('button');
 var elm$html$Html$div = _VirtualDom_node('div');
@@ -7123,7 +7125,7 @@ var author$project$Graph$view = function (model) {
 				_List_fromArray(
 					[
 						author$project$Graph$viewEdge(model),
-						author$project$Graph$viewVertex(model)
+						A2(elm$html$Html$Lazy$lazy, author$project$Graph$viewVertex, model.vertex)
 					])),
 				A2(
 				elm$html$Html$button,

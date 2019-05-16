@@ -5,6 +5,7 @@ import Browser.Events
 import Constant exposing (..)
 import Html
 import Html.Events
+import Html.Lazy
 import Http
 import Json.Decode exposing (Decoder, array, field, int, list, map, map3)
 import Json.Encode
@@ -12,6 +13,7 @@ import Set
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Svg.Events exposing (onClick)
+import Svg.Lazy
 import Tuple exposing (first, second)
 
 
@@ -137,32 +139,28 @@ viewMaze model =
     let
         ( i, j ) =
             getArrayArraySize model.maze
+
+        threshold =
+            floor (toFloat model.routeDistance * model.routeRatio) + 2
     in
     svg
         [ viewBox ("0 0 " ++ String.fromInt (i * 10) ++ " " ++ String.fromInt (j * 10)), class "svg_model" ]
         [ rect [ class "maze_background", x "0", y "0", width (String.fromInt (i * 10)), height (String.fromInt (j * 10)) ] []
-        , viewMazeWall model
+        , Svg.Lazy.lazy2 viewMazeWall model.maze threshold
         ]
 
 
-viewMazeWall : Model -> Svg Msg
-viewMazeWall model =
-    let
-        threshold =
-            floor (toFloat model.routeDistance * model.routeRatio) + 2
-
-        svgMsgArray =
-            indexedMap (floorMaze threshold) model.maze
-    in
+viewMazeWall : Array (Array Int) -> Int -> Svg Msg
+viewMazeWall maze threshold =
     g [ class "maze" ]
-        [ g [] (List.concat (toList (indexedMap (floorMaze threshold) model.maze)))
-        , g [] (List.concat (toList (indexedMap (unreachMaze threshold) model.maze)))
-        , g [] (List.concat (toList (indexedMap (reachMaze threshold) model.maze)))
+        [ g [] (toList (indexedMap (Svg.Lazy.lazy2 floorMaze) maze))
+        , g [] (toList (indexedMap (unreachMaze threshold) maze))
+        , g [] (toList (indexedMap (reachMaze threshold) maze))
         ]
 
 
-floorMaze : Int -> Int -> Array Int -> List (Svg Msg)
-floorMaze threshold xInd column =
+floorMaze : Int -> Array Int -> Svg Msg
+floorMaze xInd column =
     let
         func ( yInd, val ) =
             rect
@@ -174,10 +172,10 @@ floorMaze threshold xInd column =
                 ]
                 []
     in
-    toIndexedList column |> List.filter (second >> (==) 0) |> List.map func
+    toIndexedList column |> List.filter (second >> (==) 0) |> List.map func |> (\x -> g [] x)
 
 
-reachMaze : Int -> Int -> Array Int -> List (Svg Msg)
+reachMaze : Int -> Int -> Array Int -> Svg Msg
 reachMaze threshold xInd column =
     let
         func ( yInd, val ) =
@@ -190,10 +188,10 @@ reachMaze threshold xInd column =
                 ]
                 []
     in
-    toIndexedList column |> List.filter (second >> (\i -> i >= 2 && i < threshold)) |> List.map func
+    toIndexedList column |> List.filter (second >> (\i -> i >= 2 && i < threshold)) |> List.map func |> (\x -> g [] x)
 
 
-unreachMaze : Int -> Int -> Array Int -> List (Svg Msg)
+unreachMaze : Int -> Int -> Array Int -> Svg Msg
 unreachMaze threshold xInd column =
     let
         func ( yInd, val ) =
@@ -206,7 +204,7 @@ unreachMaze threshold xInd column =
                 ]
                 []
     in
-    toIndexedList column |> List.filter (second >> (\i -> i >= threshold)) |> List.map func
+    toIndexedList column |> List.filter (second >> (\i -> i >= threshold)) |> List.map func |> (\x -> g [] x)
 
 
 view : Model -> Html.Html Msg
@@ -219,7 +217,7 @@ view model =
         [ svg
             [ viewBox ("0 0 " ++ String.fromInt (xInd * 10) ++ " " ++ String.fromInt (yInd * 10)), class "svg_model" ]
             [ viewEdge model
-            , viewVertex model
+            , Html.Lazy.lazy viewVertex model.vertex
             ]
         , Html.button [ Html.Events.onClick SubmitGraph ] [ Html.text "submit graph" ]
         , viewMaze model
@@ -356,13 +354,13 @@ getSize model =
     getArrayArraySize model.vertex
 
 
-viewVertex : Model -> Svg Msg
-viewVertex model =
+viewVertex : Array (Array Bool) -> Svg Msg
+viewVertex vertex =
     let
         svgMsgArray =
-            indexedMap calcVertex model.vertex
+            indexedMap (Svg.Lazy.lazy2 calcVertex) vertex
     in
-    g [ class "vertex" ] (List.concat (List.map toList (toList svgMsgArray)))
+    g [ class "vertex" ] (toList svgMsgArray)
 
 
 indexToString : Int -> String
@@ -375,7 +373,7 @@ indexToRecString i =
     String.fromInt (i * 10 - 2)
 
 
-calcVertex : Int -> Array Bool -> Array (Svg Msg)
+calcVertex : Int -> Array Bool -> Svg Msg
 calcVertex xInd column =
     let
         func yInd status =
@@ -406,12 +404,12 @@ calcVertex xInd column =
                     []
                 ]
     in
-    indexedMap func column
+    g [] (toList (indexedMap (Svg.Lazy.lazy2 func) column))
 
 
 viewEdge : Model -> Svg Msg
 viewEdge model =
-    g [ class "edge" ] [ calcEdgeC model.edgeC, calcEdgeR model.edgeR ]
+    g [ class "edge" ] [ Html.Lazy.lazy calcEdgeC model.edgeC, Html.Lazy.lazy calcEdgeR model.edgeR ]
 
 
 calcEdgeC : Set.Set ( Int, Int ) -> Svg Msg
