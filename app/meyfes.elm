@@ -132,7 +132,7 @@ viewImage model =
 
         Just url ->
             div []
-                [ img [ src url, width 200 ] []
+                [ img [ src url, class "upload_image" ] []
                 ]
 
 
@@ -148,26 +148,26 @@ viewConverted model =
                 [ onClick ImageRequested
                 , class buttonName
                 ]
-                [ text "Load Image" ]
+                [ text "Upload Photo" ]
 
         Processing ->
             div []
-                [ text "converting"
-                , button
+                [ button
                     [ onClick ImageRequested
                     , class buttonName
                     ]
-                    [ text "Reupload Image" ]
+                    [ text "Reupload Photo" ]
+                , div [] [ text "Converting" ]
                 ]
 
         Done ->
             div []
-                [ text "finish!!"
-                , button
+                [ button
                     [ onClick ImageRequested
                     , class buttonName
                     ]
-                    [ text "Reupload Image" ]
+                    [ text "Reupload Photo" ]
+                , div [] [ text "Finish" ]
                 ]
 
 

@@ -63,10 +63,7 @@ a:link, a:visited, a:hover, a:active{
     float: left;
     width: 750px;
 }
-.sidemenu {
-    float:right;
-    width: 275px;
-}
+
 
 .footer{
     width: 100%;
@@ -76,20 +73,16 @@ a:link, a:visited, a:hover, a:active{
     display: block;
     clear: both;
 }
-
-/*
-.header, .main, .sidemenu, .footer {
-    border: 1px solid #aaa;
-    background-color: #ccc;
-}
-*/
-
 .header .footer{
     height: 100px;
 }
 
+.upload_image{
+    width: 400px;
+}
+
 .svg_model{
-    width:970px;
+    width: 750px;
     margin: 20px 0px;
 }
 .vertex .active{

@@ -7177,7 +7177,7 @@ var author$project$Main$viewConverted = function (model) {
 					]),
 				_List_fromArray(
 					[
-						elm$html$Html$text('Load Image')
+						elm$html$Html$text('Upload Photo')
 					]));
 		case 'Processing':
 			return A2(
@@ -7185,7 +7185,6 @@ var author$project$Main$viewConverted = function (model) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						elm$html$Html$text('converting'),
 						A2(
 						elm$html$Html$button,
 						_List_fromArray(
@@ -7195,7 +7194,14 @@ var author$project$Main$viewConverted = function (model) {
 							]),
 						_List_fromArray(
 							[
-								elm$html$Html$text('Reupload Image')
+								elm$html$Html$text('Reupload Photo')
+							])),
+						A2(
+						elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								elm$html$Html$text('Converting')
 							]))
 					]));
 		default:
@@ -7204,7 +7210,6 @@ var author$project$Main$viewConverted = function (model) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						elm$html$Html$text('finish!!'),
 						A2(
 						elm$html$Html$button,
 						_List_fromArray(
@@ -7214,7 +7219,14 @@ var author$project$Main$viewConverted = function (model) {
 							]),
 						_List_fromArray(
 							[
-								elm$html$Html$text('Reupload Image')
+								elm$html$Html$text('Reupload Photo')
+							])),
+						A2(
+						elm$html$Html$div,
+						_List_Nil,
+						_List_fromArray(
+							[
+								elm$html$Html$text('Finish')
 							]))
 					]));
 	}
@@ -7256,12 +7268,6 @@ var elm$html$Html$Attributes$src = function (url) {
 		'src',
 		_VirtualDom_noJavaScriptOrHtmlUri(url));
 };
-var elm$html$Html$Attributes$width = function (n) {
-	return A2(
-		_VirtualDom_attribute,
-		'width',
-		elm$core$String$fromInt(n));
-};
 var author$project$Main$viewImage = function (model) {
 	var _n0 = model.image;
 	if (_n0.$ === 'Nothing') {
@@ -7278,7 +7284,7 @@ var author$project$Main$viewImage = function (model) {
 					_List_fromArray(
 						[
 							elm$html$Html$Attributes$src(url),
-							elm$html$Html$Attributes$width(200)
+							elm$html$Html$Attributes$class('upload_image')
 						]),
 					_List_Nil)
 				]));
