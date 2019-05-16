@@ -61,7 +61,7 @@ a:link, a:visited, a:hover, a:active{
 .main {
     display: block;
     float: left;
-    width: 660;
+    width: 750px;
 }
 .sidemenu {
     float:right;

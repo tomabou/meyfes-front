@@ -110,7 +110,6 @@ view model =
                 , viewConverted model
                 , Html.map GotGraphMsg (Graph.view model.gridGraph)
                 ]
-            , div [ class "sidemenu" ] []
             ]
         , footer [ class "footer" ] []
         ]
