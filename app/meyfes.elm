@@ -139,11 +139,15 @@ viewImage model =
 
 viewConverted : Model -> Html Msg
 viewConverted model =
+    let
+        buttonName =
+            "btn-flat-border"
+    in
     case model.converteState of
         NotYet ->
             button
                 [ onClick ImageRequested
-                , class "button1"
+                , class buttonName
                 ]
                 [ text "Load Image" ]
 
@@ -152,7 +156,7 @@ viewConverted model =
                 [ text "converting"
                 , button
                     [ onClick ImageRequested
-                    , class "button1"
+                    , class buttonName
                     ]
                     [ text "Reupload Image" ]
                 ]
@@ -162,7 +166,7 @@ viewConverted model =
                 [ text "finish!!"
                 , button
                     [ onClick ImageRequested
-                    , class "button1"
+                    , class buttonName
                     ]
                     [ text "Reupload Image" ]
                 ]

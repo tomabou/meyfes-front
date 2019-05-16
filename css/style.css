@@ -1,7 +1,7 @@
 @charset "UTF-8";
 
 html{
-    font-size: 62.5%;
+    font-size: 100%;
 }
 
 body{
@@ -88,12 +88,9 @@ a:link, a:visited, a:hover, a:active{
     height: 100px;
 }
 
-.main, .sidemenu{
-    height: 500px;
-}
-
 .svg_model{
     width:970px;
+    margin: 20px 0px;
 }
 .vertex .active{
     fill: #d03c56;
@@ -120,4 +117,21 @@ a:link, a:visited, a:hover, a:active{
 }
 .maze .reach-floor {
     fill: #d03c56;
+}
+.btn-flat-border {
+  font-size: 1.8em;
+  font-weight: bold;
+  display: inline-block;
+  padding: 0.5em 1em;
+  text-decoration: none;
+  background: rgb(250, 250, 250);
+  color: #d03c56;
+  border: solid 2px #d03c56;
+  border-radius: 3px;
+  transition: .2s;
+}
+
+.btn-flat-border:hover {
+  background: #d03c56;
+  color: white;
 }

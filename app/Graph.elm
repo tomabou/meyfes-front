@@ -4,6 +4,7 @@ import Array exposing (..)
 import Browser.Events
 import Constant exposing (..)
 import Html
+import Html.Attributes
 import Html.Events
 import Html.Lazy
 import Http
@@ -114,7 +115,7 @@ update msg model =
                         routesize =
                             foldl Basics.max 0 (Array.map (foldl Basics.max 0) arr) + 2
                     in
-                    ( { model | maze = arr, routeDistance = routesize * 6 // 5 }, Cmd.none )
+                    ( { model | maze = arr, routeDistance = routesize * 6 // 5, showRoute = False, routeRatio = 0 }, Cmd.none )
 
                 Err err ->
                     ( model, Cmd.none )
@@ -219,9 +220,9 @@ view model =
             [ viewEdge model
             , Html.Lazy.lazy viewVertex model.vertex
             ]
-        , Html.button [ Html.Events.onClick SubmitGraph ] [ Html.text "submit graph" ]
+        , Html.button [ Html.Events.onClick SubmitGraph, Html.Attributes.class "btn-flat-border" ] [ Html.text "submit graph" ]
         , viewMaze model
-        , Html.button [ Html.Events.onClick ShowRoute ]
+        , Html.button [ Html.Events.onClick ShowRoute, Html.Attributes.class "btn-flat-border" ]
             [ Html.text
                 (if model.showRoute then
                     "hide answer"

@@ -5220,7 +5220,7 @@ var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
 var author$project$Main$subscriptions = function (model) {
 	return elm$core$Platform$Sub$none;
 };
-var author$project$Constant$urlPrefix = 'http://localhost:5000';
+var author$project$Constant$urlPrefix = 'https://tomabou.com';
 var author$project$Graph$GraphInfo = F3(
 	function (vertex, edgeR, edgeC) {
 		return {edgeC: edgeC, edgeR: edgeR, vertex: vertex};
@@ -6447,7 +6447,7 @@ var author$project$Graph$update = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{maze: arr, routeDistance: ((routesize * 6) / 5) | 0}),
+							{maze: arr, routeDistance: ((routesize * 6) / 5) | 0, routeRatio: 0, showRoute: false}),
 						elm$core$Platform$Cmd$none);
 				} else {
 					var err = result.a;
@@ -7099,6 +7099,15 @@ var elm$html$Html$button = _VirtualDom_node('button');
 var elm$html$Html$div = _VirtualDom_node('div');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
+var elm$json$Json$Encode$string = _Json_wrap;
+var elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			elm$json$Json$Encode$string(string));
+	});
+var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
 var elm$html$Html$Events$onClick = function (msg) {
 	return A2(
 		elm$html$Html$Events$on,
@@ -7131,7 +7140,8 @@ var author$project$Graph$view = function (model) {
 				elm$html$Html$button,
 				_List_fromArray(
 					[
-						elm$html$Html$Events$onClick(author$project$Graph$SubmitGraph)
+						elm$html$Html$Events$onClick(author$project$Graph$SubmitGraph),
+						elm$html$Html$Attributes$class('btn-flat-border')
 					]),
 				_List_fromArray(
 					[
@@ -7142,7 +7152,8 @@ var author$project$Graph$view = function (model) {
 				elm$html$Html$button,
 				_List_fromArray(
 					[
-						elm$html$Html$Events$onClick(author$project$Graph$ShowRoute)
+						elm$html$Html$Events$onClick(author$project$Graph$ShowRoute),
+						elm$html$Html$Attributes$class('btn-flat-border')
 					]),
 				_List_fromArray(
 					[
@@ -7152,16 +7163,8 @@ var author$project$Graph$view = function (model) {
 			]));
 };
 var author$project$Main$ImageRequested = {$: 'ImageRequested'};
-var elm$json$Json$Encode$string = _Json_wrap;
-var elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			elm$json$Json$Encode$string(string));
-	});
-var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
 var author$project$Main$viewConverted = function (model) {
+	var buttonName = 'btn-flat-border';
 	var _n0 = model.converteState;
 	switch (_n0.$) {
 		case 'NotYet':
@@ -7170,7 +7173,7 @@ var author$project$Main$viewConverted = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$Events$onClick(author$project$Main$ImageRequested),
-						elm$html$Html$Attributes$class('button1')
+						elm$html$Html$Attributes$class(buttonName)
 					]),
 				_List_fromArray(
 					[
@@ -7188,7 +7191,7 @@ var author$project$Main$viewConverted = function (model) {
 						_List_fromArray(
 							[
 								elm$html$Html$Events$onClick(author$project$Main$ImageRequested),
-								elm$html$Html$Attributes$class('button1')
+								elm$html$Html$Attributes$class(buttonName)
 							]),
 						_List_fromArray(
 							[
@@ -7207,7 +7210,7 @@ var author$project$Main$viewConverted = function (model) {
 						_List_fromArray(
 							[
 								elm$html$Html$Events$onClick(author$project$Main$ImageRequested),
-								elm$html$Html$Attributes$class('button1')
+								elm$html$Html$Attributes$class(buttonName)
 							]),
 						_List_fromArray(
 							[
