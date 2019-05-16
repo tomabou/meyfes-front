@@ -7318,14 +7318,7 @@ var author$project$Main$view = function (model) {
 								elm$html$Html$map,
 								author$project$Main$GotGraphMsg,
 								author$project$Graph$view(model.gridGraph))
-							])),
-						A2(
-						elm$html$Html$div,
-						_List_fromArray(
-							[
-								elm$html$Html$Attributes$class('sidemenu')
-							]),
-						_List_Nil)
+							]))
 					])),
 				A2(
 				elm$html$Html$footer,
