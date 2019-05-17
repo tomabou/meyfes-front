@@ -38,17 +38,22 @@ a:link, a:visited, a:hover, a:active{
     box-shadow: 0 0 10px 1px #e3e3e3;
 }
 
+.title{
+    font-family: 'Economica', sans-serif;
+    font-size: 2.5em;
+    height: 56px;
+    color: #314661;
+    margin: 20 auto 50;
+    text-align: center;
+}
+
+
 .logo {
     width: 225px;
     height: 56px;
     margin: 0 auto;
-    /*
-    background: url('../images/logo.png') no-repeat;
-    */
-    overflow: hidden;
-    text-indent: 100%;
-    white-space: nowrap;
 }
+
 
 .logo a {
     display: block;

@@ -7277,12 +7277,12 @@ var author$project$Main$viewHeader = function (model) {
 				elm$html$Html$h1,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('logo'),
+						elm$html$Html$Attributes$class('title'),
 						elm$html$Html$Attributes$href(author$project$Constant$urlPrefix)
 					]),
 				_List_fromArray(
 					[
-						elm$html$Html$text('image uploader')
+						elm$html$Html$text('Maze Creator')
 					]))
 			]));
 };

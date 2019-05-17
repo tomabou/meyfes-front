@@ -122,8 +122,8 @@ view model =
 viewHeader : Model -> Html Msg
 viewHeader model =
     header [ class "header" ]
-        [ h1 [ class "logo", href urlPrefix ]
-            [ text "image uploader"
+        [ h1 [ class "title", href urlPrefix ]
+            [ text "Maze Creator"
             ]
         ]
 
