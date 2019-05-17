@@ -1,4 +1,4 @@
-module Main exposing (main)
+port module Main exposing (main)
 
 import Array
 import Browser
@@ -12,7 +12,14 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
 import Json.Decode exposing (Decoder, field, string)
+import Json.Encode as E
 import Task
+
+
+port imageString : E.Value -> Cmd msg
+
+
+port gridGraph : (E.Value -> msg) -> Sub msg
 
 
 main =
@@ -28,6 +35,7 @@ type State
     = NotYet
     | Processing
     | Done
+    | Error Json.Decode.Error
 
 
 type alias Model =
@@ -46,7 +54,8 @@ type Msg
     = ImageRequested
     | ImageSelected File
     | ImageLoaded String
-    | ImageConverted (Result Http.Error Graph.GraphInfo)
+    | FailedCreateGraph Json.Decode.Error
+    | GraphCreated Graph.GraphInfo
     | GotGraphMsg Graph.Msg
 
 
@@ -61,31 +70,26 @@ update msg model =
             , Cmd.batch
                 [ Task.perform ImageLoaded
                     (File.toUrl file)
-                , Http.post
-                    { url = urlPrefix
-                    , body = Http.multipartBody [ Http.filePart "image" file ]
-                    , expect = Http.expectJson ImageConverted Graph.decoder
-                    }
                 ]
             )
 
         ImageLoaded url ->
-            ( { model | image = Just url, converteState = Processing }, Cmd.none )
+            ( { model | image = Just url, converteState = Processing }
+            , imageString (E.string url)
+            )
 
-        ImageConverted res ->
-            case res of
-                Ok graph ->
-                    let
-                        oldGraph =
-                            model.gridGraph
+        GraphCreated graph ->
+            let
+                oldGraph =
+                    model.gridGraph
 
-                        newGraph =
-                            { oldGraph | vertex = graph.vertex, edgeR = graph.edgeR, edgeC = graph.edgeC }
-                    in
-                    ( { model | gridGraph = newGraph, converteState = Done }, Cmd.none )
+                newGraph =
+                    { oldGraph | vertex = graph.vertex, edgeR = graph.edgeR, edgeC = graph.edgeC }
+            in
+            ( { model | gridGraph = newGraph, converteState = Done }, Cmd.none )
 
-                Err err ->
-                    ( model, Cmd.none )
+        FailedCreateGraph err ->
+            ( { model | converteState = Error err }, Cmd.none )
 
         GotGraphMsg graphMsg ->
             let
@@ -170,10 +174,29 @@ viewConverted model =
                 , div [] [ text "Finish" ]
                 ]
 
+        Error err ->
+            div []
+                [ button
+                    [ onClick ImageRequested
+                    , class buttonName
+                    ]
+                    [ text "Reupload Photo" ]
+                , pre [] [ text (Json.Decode.errorToString err) ]
+                ]
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    let
+        func value =
+            case Json.Decode.decodeValue Graph.decoder value of
+                Ok graph ->
+                    GraphCreated graph
+
+                Err err ->
+                    FailedCreateGraph err
+    in
+    gridGraph func
 
 
 
