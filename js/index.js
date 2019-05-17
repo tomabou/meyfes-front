@@ -4477,17 +4477,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { aK: 'hidden', K: 'visibilitychange' }
+		? { aK: 'hidden', L: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { aK: 'mozHidden', K: 'mozvisibilitychange' }
+		? { aK: 'mozHidden', L: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { aK: 'msHidden', K: 'msvisibilitychange' }
+		? { aK: 'msHidden', L: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { aK: 'webkitHidden', K: 'webkitvisibilitychange' }
-		: { aK: 'hidden', K: 'visibilitychange' };
+		? { aK: 'webkitHidden', L: 'webkitvisibilitychange' }
+		: { aK: 'hidden', L: 'visibilitychange' };
 }
 
 
@@ -4572,8 +4572,8 @@ function _Browser_getViewport()
 		aB: {
 			U: _Browser_window.pageXOffset,
 			V: _Browser_window.pageYOffset,
-			I: _Browser_doc.documentElement.clientWidth,
-			C: _Browser_doc.documentElement.clientHeight
+			J: _Browser_doc.documentElement.clientWidth,
+			D: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4583,8 +4583,8 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		I: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		C: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		J: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		D: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4608,14 +4608,14 @@ function _Browser_getViewportOf(id)
 	{
 		return {
 			ax: {
-				I: node.scrollWidth,
-				C: node.scrollHeight
+				J: node.scrollWidth,
+				D: node.scrollHeight
 			},
 			aB: {
 				U: node.scrollLeft,
 				V: node.scrollTop,
-				I: node.clientWidth,
-				C: node.clientHeight
+				J: node.clientWidth,
+				D: node.clientHeight
 			}
 		};
 	});
@@ -4649,14 +4649,14 @@ function _Browser_getElement(id)
 			aB: {
 				U: x,
 				V: y,
-				I: _Browser_doc.documentElement.clientWidth,
-				C: _Browser_doc.documentElement.clientHeight
+				J: _Browser_doc.documentElement.clientWidth,
+				D: _Browser_doc.documentElement.clientHeight
 			},
 			aG: {
 				U: x + rect.left,
 				V: y + rect.top,
-				I: rect.width,
-				C: rect.height
+				J: rect.width,
+				D: rect.height
 			}
 		};
 	});
@@ -4967,7 +4967,7 @@ var author$project$Graph$initial = F2(
 			N: elm$core$Array$empty,
 			T: 0,
 			x: 0,
-			F: false,
+			G: false,
 			e: A2(
 				elm$core$Array$repeat,
 				x,
@@ -4976,7 +4976,7 @@ var author$project$Graph$initial = F2(
 	});
 var author$project$Main$Model = F3(
 	function (image, gridGraph, converteState) {
-		return {L: converteState, B: gridGraph, W: image};
+		return {A: converteState, C: gridGraph, W: image};
 	});
 var author$project$Main$NotYet = {$: 0};
 var elm$core$Maybe$Nothing = {$: 1};
@@ -5380,8 +5380,11 @@ var author$project$Main$FailedCreateGraph = function (a) {
 var author$project$Main$GraphCreated = function (a) {
 	return {$: 4, a: a};
 };
+var author$project$Main$Processing = {$: 1};
 var elm$json$Json$Decode$value = _Json_decodeValue;
 var author$project$Main$gridGraph = _Platform_incomingPort('gridGraph', elm$json$Json$Decode$value);
+var elm$core$Platform$Sub$batch = _Platform_batch;
+var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
 var elm$json$Json$Decode$decodeValue = _Json_run;
 var author$project$Main$subscriptions = function (model) {
 	var func = function (value) {
@@ -5394,7 +5397,7 @@ var author$project$Main$subscriptions = function (model) {
 			return author$project$Main$FailedCreateGraph(err);
 		}
 	};
-	return author$project$Main$gridGraph(func);
+	return _Utils_eq(model.A, author$project$Main$Processing) ? author$project$Main$gridGraph(func) : elm$core$Platform$Sub$none;
 };
 var author$project$Constant$urlPrefix = 'https://tomabou.com';
 var author$project$Graph$MazeCreated = function (a) {
@@ -6460,7 +6463,7 @@ var author$project$Graph$update = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{N: arr, T: ((routesize * 6) / 5) | 0, x: 0, F: false}),
+							{N: arr, T: ((routesize * 6) / 5) | 0, x: 0, G: false}),
 						elm$core$Platform$Cmd$none);
 				} else {
 					var err = result.a;
@@ -6475,7 +6478,7 @@ var author$project$Graph$update = F2(
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{x: 1 - model.x, F: !model.F}),
+						{x: 1 - model.x, G: !model.G}),
 					elm$core$Platform$Cmd$none);
 		}
 	});
@@ -6492,7 +6495,6 @@ var author$project$Main$ImageLoaded = function (a) {
 var author$project$Main$ImageSelected = function (a) {
 	return {$: 1, a: a};
 };
-var author$project$Main$Processing = {$: 1};
 var author$project$Main$imageString = _Platform_outgoingPort('imageString', elm$core$Basics$identity);
 var elm$core$Platform$Cmd$map = _Platform_map;
 var elm$core$Task$Perform = elm$core$Basics$identity;
@@ -6599,21 +6601,21 @@ var author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							L: author$project$Main$Processing,
+							A: author$project$Main$Processing,
 							W: elm$core$Maybe$Just(url)
 						}),
 					author$project$Main$imageString(
 						elm$json$Json$Encode$string(url)));
 			case 4:
 				var graph = msg.a;
-				var oldGraph = model.B;
+				var oldGraph = model.C;
 				var newGraph = _Utils_update(
 					oldGraph,
 					{l: graph.l, m: graph.m, e: graph.e});
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{L: author$project$Main$Done, B: newGraph}),
+						{A: author$project$Main$Done, C: newGraph}),
 					elm$core$Platform$Cmd$none);
 			case 3:
 				var err = msg.a;
@@ -6621,18 +6623,18 @@ var author$project$Main$update = F2(
 					_Utils_update(
 						model,
 						{
-							L: author$project$Main$Error(err)
+							A: author$project$Main$Error(err)
 						}),
 					elm$core$Platform$Cmd$none);
 			default:
 				var graphMsg = msg.a;
-				var _n1 = A2(author$project$Graph$update, graphMsg, model.B);
+				var _n1 = A2(author$project$Graph$update, graphMsg, model.C);
 				var graph = _n1.a;
 				var cmd = _n1.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{B: graph}),
+						{C: graph}),
 					A2(elm$core$Platform$Cmd$map, author$project$Main$GotGraphMsg, cmd));
 		}
 	});
@@ -7153,7 +7155,7 @@ var author$project$Graph$view = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$text(
-						model.F ? 'hide answer' : 'show answer')
+						model.G ? 'hide answer' : 'show answer')
 					]))
 			]));
 };
@@ -7161,7 +7163,7 @@ var author$project$Main$ImageRequested = {$: 0};
 var elm$html$Html$pre = _VirtualDom_node('pre');
 var author$project$Main$viewConverted = function (model) {
 	var buttonName = 'btn-flat-border';
-	var _n0 = model.L;
+	var _n0 = model.A;
 	switch (_n0.$) {
 		case 0:
 			return A2(
@@ -7346,7 +7348,7 @@ var author$project$Main$view = function (model) {
 								A2(
 								elm$html$Html$map,
 								author$project$Main$GotGraphMsg,
-								author$project$Graph$view(model.B))
+								author$project$Graph$view(model.C))
 							]))
 					])),
 				A2(

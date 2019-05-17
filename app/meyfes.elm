@@ -196,7 +196,11 @@ subscriptions model =
                 Err err ->
                     FailedCreateGraph err
     in
-    gridGraph func
+    if model.converteState == Processing then
+        gridGraph func
+
+    else
+        Sub.none
 
 
 
