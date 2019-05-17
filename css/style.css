@@ -42,7 +42,9 @@ a:link, a:visited, a:hover, a:active{
     width: 225px;
     height: 56px;
     margin: 0 auto;
+    /*
     background: url('../images/logo.png') no-repeat;
+    */
     overflow: hidden;
     text-indent: 100%;
     white-space: nowrap;
@@ -60,7 +62,7 @@ a:link, a:visited, a:hover, a:active{
 }
 .main {
     display: block;
-    float: left;
+    margin: 0 auto;
     width: 750px;
 }
 
