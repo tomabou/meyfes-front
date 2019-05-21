@@ -13,7 +13,7 @@ const wasm_test = (x, y, vertex_array, edge_array) => {
     const edge = new Uint8Array(new Uint32Array(edge_array).buffer);
     const vlen = Math.floor(vertex_array.length / 2);
     const elen = Math.floor(edge_array.length / 4);
-    const buf_size = x * y * 16;
+    const buf_size = (x + 1) * (y + 1) * 16;
     console.log(buf_size);
     console.log(vlen, elen);
     const maze_buf = Module._malloc(buf_size * 4);
