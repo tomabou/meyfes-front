@@ -1,4 +1,4 @@
-module Graph exposing (GraphInfo, Model, Msg, decoder, initial, subscriptions, update, view)
+port module Graph exposing (GraphInfo, Model, Msg, decoder, initial, subscriptions, update, view)
 
 import Array exposing (..)
 import Browser.Events
@@ -16,6 +16,9 @@ import Svg.Attributes exposing (..)
 import Svg.Events exposing (onClick)
 import Svg.Lazy
 import Tuple exposing (first, second)
+
+
+port finalGridGraph : Json.Encode.Value -> Cmd msg
 
 
 type alias Model =
@@ -85,27 +88,30 @@ update msg model =
                 ( putVertex i j model, Cmd.none )
 
         SubmitGraph ->
-            ( model
-            , Http.post
-                { url = urlPrefix ++ "/maze"
-                , body =
-                    Http.jsonBody
-                        (Json.Encode.array
-                            (Json.Encode.array
-                                (Json.Encode.int
-                                    << (\b ->
-                                            if b then
-                                                0
+            let
+                ( xSize, ySize ) =
+                    getSize model
 
-                                            else
-                                                1
-                                       )
-                                )
+                mazeMatrix =
+                    Json.Encode.array
+                        (Json.Encode.array
+                            (Json.Encode.int
+                                << (\b ->
+                                        if b then
+                                            0
+
+                                        else
+                                            1
+                                   )
                             )
-                            model.vertex
                         )
-                , expect = Http.expectJson MazeCreated mazeDecoder
-                }
+                        model.vertex
+
+                submitJson =
+                    Json.Encode.object [ ( "x", Json.Encode.int xSize ), ( "y", Json.Encode.int ySize ), ( "maze", mazeMatrix ) ]
+            in
+            ( model
+            , finalGridGraph submitJson
             )
 
         MazeCreated result ->

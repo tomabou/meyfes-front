@@ -8,6 +8,7 @@
 	<link rel="stylesheet" href="css/style.css">
 	<link href="https://fonts.googleapis.com/css?family=Economica:700" rel=" stylesheet">
 	<script src="js/index.js"></script>
+	<script src="js/may3.js"></script>
 	<script src="js/wrapper_func.js"></script>
 </head>
 
@@ -18,6 +19,45 @@
 			node: document.getElementById('elm'),
 		});
 		app.ports.imageString.subscribe(image_port_func)
+		app.ports.finalGridGraph.subscribe(data => {
+			const x = data.x;
+			const y = data.y;
+			const maze = data.maze;
+
+			const vertex = [];
+			for (let i = 0; i < x; i++) {
+				for (let j = 0; j < y; j++) {
+					if (maze[i][j] === 0) {
+						vertex.push(i);
+						vertex.push(j);
+					}
+				}
+			}
+			const edge = [];
+			for (let i = 0; i < x - 1; i++) {
+				for (let j = 0; j < y; j++) {
+					if (maze[i][j] === 0 && maze[i + 1][j]) {
+						edge.push(i);
+						edge.push(j);
+						edge.push(i + 1);
+						edge.push(j);
+					}
+				}
+			}
+			for (let i = 0; i < x; i++) {
+				for (let j = 0; j < y - 1; j++) {
+					if (maze[i][j] === 0 && maze[i][j + 1]) {
+						edge.push(i);
+						edge.push(j);
+						edge.push(i);
+						edge.push(j + 1);
+					}
+				}
+			}
+			console.log(vertex);
+			console.log(edge);
+			wasm_test(edge, vertex);
+		})
 
 	</script>
 </body>

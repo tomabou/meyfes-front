@@ -1,21 +1,34 @@
-const wasm_test = () => {
-    console.log("hello")
-    const offset = Module._malloc(20);
-    const intPtr = Module.HEAP32.subarray(offset / 4, offset / 4 + 5);
-    intPtr[0] = 1;
-    intPtr[1] = 2;
-    intPtr[2] = 3;
-    intPtr[3] = 4;
-    intPtr[4] = 5;
-    const ans = Module.ccall("test_func", "number", ["number", "number"], [5, offset])
-    for (let i = 0; i < 5; i++) {
-        console.log(intPtr[i])
+const wasm_test = (edge_array, vertex_array) => {
+    const tate = 3;
+    const yoko = 4;
+    const vertex = new Uint8Array(new Uint32Array(vertex_array).buffer);
+    const edge = new Uint8Array(new Uint32Array(edge_array).buffer);
+    const vlen = vertex_array.length;
+    const elen = edge_array.length;
+    const buf_size = vlen * elen * 4;
+    const maze_buf = Module._malloc(buf_size * 4);
+    Module.ccall("create_maze"
+        , "number",
+        ["number", "number", "number", "array", "number", "array", "number"],
+        [tate, yoko, vlen, vertex, elen, edge, maze_buf])
+    const intPtr = Module.HEAP32.subarray(maze_buf / 4, maze_buf / 4 + buf_size);
+    const len = intPtr[0];
+    console.log(len);
+    let ans = [[]];
+    let ans_index = 0;
+    for (let i = 1; i <= len; i++) {
+        const j = intPtr[i];
+        if (j === -1) {
+            ans.push([]);
+            ans_index = ans_index + 1;
+            continue;
+        }
+        ans[ans_index].push(intPtr[i]);
     }
-    Module._free(offset);
-
-    console.log(ans)
+    ans.pop(); ans.pop();
+    console.log(ans);
+    Module._free(maze_buf);
 }
-
 
 const image_port_func = data => {
     const width = 200;
