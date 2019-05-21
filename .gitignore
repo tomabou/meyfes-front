@@ -5,4 +5,5 @@ node_modules/
 package-lock.json
 package.json
 .vscode/
-js/
+js/may3.js
+js/may3.wasm
