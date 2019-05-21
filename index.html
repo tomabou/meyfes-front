@@ -23,6 +23,7 @@
 			const x = data.x;
 			const y = data.y;
 			const maze = data.maze;
+			console.log(x, y);
 
 			const vertex = [];
 			for (let i = 0; i < x; i++) {
@@ -36,7 +37,7 @@
 			const edge = [];
 			for (let i = 0; i < x - 1; i++) {
 				for (let j = 0; j < y; j++) {
-					if (maze[i][j] === 0 && maze[i + 1][j]) {
+					if (maze[i][j] === 0 && maze[i + 1][j] === 0) {
 						edge.push(i);
 						edge.push(j);
 						edge.push(i + 1);
@@ -46,7 +47,7 @@
 			}
 			for (let i = 0; i < x; i++) {
 				for (let j = 0; j < y - 1; j++) {
-					if (maze[i][j] === 0 && maze[i][j + 1]) {
+					if (maze[i][j] === 0 && maze[i][j + 1] === 0) {
 						edge.push(i);
 						edge.push(j);
 						edge.push(i);
@@ -56,7 +57,9 @@
 			}
 			console.log(vertex);
 			console.log(edge);
-			wasm_test(edge, vertex);
+			const ans = { 'mazelist': wasm_test(x, y, vertex, edge) };
+
+			app.ports.createdMaze.send(ans);
 		})
 
 	</script>

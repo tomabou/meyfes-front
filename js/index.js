@@ -4777,6 +4777,7 @@ var elm$core$Array$repeat = F2(
 				return e;
 			});
 	});
+var elm$core$Maybe$Nothing = {$: 'Nothing'};
 var elm$core$Basics$identity = function (x) {
 	return x;
 };
@@ -4792,6 +4793,7 @@ var author$project$Graph$initial = F2(
 			edgeC: elm$core$Set$empty,
 			edgeR: elm$core$Set$empty,
 			maze: elm$core$Array$empty,
+			mazeConverted: elm$core$Maybe$Nothing,
 			routeDistance: 0,
 			routeRatio: 0,
 			showRoute: false,
@@ -4806,7 +4808,6 @@ var author$project$Main$Model = F3(
 		return {converteState: converteState, gridGraph: gridGraph, image: image};
 	});
 var author$project$Main$NotYet = {$: 'NotYet'};
-var elm$core$Maybe$Nothing = {$: 'Nothing'};
 var elm$core$Basics$True = {$: 'True'};
 var elm$core$Result$isOk = function (result) {
 	if (result.$ === 'Ok') {
@@ -5202,18 +5203,47 @@ var author$project$Graph$decoder = A4(
 			elm$core$Set$fromList,
 			elm$json$Json$Decode$list(
 				A2(elm$json$Json$Decode$map, author$project$Graph$intToPair, elm$json$Json$Decode$int)))));
+var author$project$Graph$FailedCreateMaze = function (a) {
+	return {$: 'FailedCreateMaze', a: a};
+};
+var author$project$Graph$MazeCreated = function (a) {
+	return {$: 'MazeCreated', a: a};
+};
+var elm$json$Json$Decode$value = _Json_decodeValue;
+var author$project$Graph$createdMaze = _Platform_incomingPort('createdMaze', elm$json$Json$Decode$value);
+var author$project$Graph$mazeDecoder = A2(
+	elm$json$Json$Decode$field,
+	'mazelist',
+	elm$json$Json$Decode$array(
+		elm$json$Json$Decode$array(elm$json$Json$Decode$int)));
+var elm$json$Json$Decode$decodeValue = _Json_run;
+var author$project$Graph$subscriptions = function (model) {
+	var func = function (value) {
+		var _n0 = A2(elm$json$Json$Decode$decodeValue, author$project$Graph$mazeDecoder, value);
+		if (_n0.$ === 'Ok') {
+			var maze = _n0.a;
+			return author$project$Graph$MazeCreated(maze);
+		} else {
+			var err = _n0.a;
+			return author$project$Graph$FailedCreateMaze(err);
+		}
+	};
+	return author$project$Graph$createdMaze(func);
+};
 var author$project$Main$FailedCreateGraph = function (a) {
 	return {$: 'FailedCreateGraph', a: a};
+};
+var author$project$Main$GotGraphMsg = function (a) {
+	return {$: 'GotGraphMsg', a: a};
 };
 var author$project$Main$GraphCreated = function (a) {
 	return {$: 'GraphCreated', a: a};
 };
 var author$project$Main$Processing = {$: 'Processing'};
-var elm$json$Json$Decode$value = _Json_decodeValue;
 var author$project$Main$gridGraph = _Platform_incomingPort('gridGraph', elm$json$Json$Decode$value);
 var elm$core$Platform$Sub$batch = _Platform_batch;
+var elm$core$Platform$Sub$map = _Platform_map;
 var elm$core$Platform$Sub$none = elm$core$Platform$Sub$batch(_List_Nil);
-var elm$json$Json$Decode$decodeValue = _Json_run;
 var author$project$Main$subscriptions = function (model) {
 	var func = function (value) {
 		var _n0 = A2(elm$json$Json$Decode$decodeValue, author$project$Graph$decoder, value);
@@ -5225,7 +5255,16 @@ var author$project$Main$subscriptions = function (model) {
 			return author$project$Main$FailedCreateGraph(err);
 		}
 	};
-	return _Utils_eq(model.converteState, author$project$Main$Processing) ? author$project$Main$gridGraph(func) : elm$core$Platform$Sub$none;
+	var sub1 = _Utils_eq(model.converteState, author$project$Main$Processing) ? author$project$Main$gridGraph(func) : elm$core$Platform$Sub$none;
+	return elm$core$Platform$Sub$batch(
+		_List_fromArray(
+			[
+				sub1,
+				A2(
+				elm$core$Platform$Sub$map,
+				author$project$Main$GotGraphMsg,
+				author$project$Graph$subscriptions(model.gridGraph))
+			]));
 };
 var elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
 var elm$core$Array$bitMask = 4294967295 >>> (32 - elm$core$Array$shiftStep);
@@ -5752,41 +5791,6 @@ var author$project$Graph$getArrayArraySize = function (arr) {
 var author$project$Graph$getSize = function (model) {
 	return author$project$Graph$getArrayArraySize(model.vertex);
 };
-var author$project$Graph$putVertex = F3(
-	function (i, j, model) {
-		var vertex = function () {
-			var _n0 = A2(elm$core$Array$get, i, model.vertex);
-			if (_n0.$ === 'Nothing') {
-				return model.vertex;
-			} else {
-				var column = _n0.a;
-				return A3(
-					elm$core$Array$set,
-					i,
-					A3(elm$core$Array$set, j, true, column),
-					model.vertex);
-			}
-		}();
-		var edgeR = A3(author$project$Graph$hasVertex, i + 1, j, model) ? A2(
-			elm$core$Set$insert,
-			_Utils_Tuple2(i, j),
-			model.edgeR) : model.edgeR;
-		var edgeR2 = A3(author$project$Graph$hasVertex, i - 1, j, model) ? A2(
-			elm$core$Set$insert,
-			_Utils_Tuple2(i - 1, j),
-			edgeR) : edgeR;
-		var edgeC = A3(author$project$Graph$hasVertex, i, j + 1, model) ? A2(
-			elm$core$Set$insert,
-			_Utils_Tuple2(i, j),
-			model.edgeC) : model.edgeC;
-		var edgeC2 = A3(author$project$Graph$hasVertex, i, j - 1, model) ? A2(
-			elm$core$Set$insert,
-			_Utils_Tuple2(i, j - 1),
-			edgeC) : edgeC;
-		return _Utils_update(
-			model,
-			{edgeC: edgeC2, edgeR: edgeR2, vertex: vertex});
-	});
 var elm$core$Elm$JsArray$foldl = _JsArray_foldl;
 var elm$core$Array$foldl = F3(
 	function (func, baseCase, _n0) {
@@ -5833,12 +5837,60 @@ var elm$core$Array$map = F2(
 			A2(elm$core$Elm$JsArray$map, helper, tree),
 			A2(elm$core$Elm$JsArray$map, func, tail));
 	});
+var elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var elm$core$Basics$not = _Basics_not;
+var author$project$Graph$isEmptyMaze = A2(
+	elm$core$Basics$composeR,
+	elm$core$Array$map(
+		A2(elm$core$Array$foldl, elm$core$Basics$or, false)),
+	A2(
+		elm$core$Basics$composeR,
+		A2(elm$core$Array$foldl, elm$core$Basics$or, false),
+		elm$core$Basics$not));
+var author$project$Graph$putVertex = F3(
+	function (i, j, model) {
+		var vertex = function () {
+			var _n0 = A2(elm$core$Array$get, i, model.vertex);
+			if (_n0.$ === 'Nothing') {
+				return model.vertex;
+			} else {
+				var column = _n0.a;
+				return A3(
+					elm$core$Array$set,
+					i,
+					A3(elm$core$Array$set, j, true, column),
+					model.vertex);
+			}
+		}();
+		var edgeR = A3(author$project$Graph$hasVertex, i + 1, j, model) ? A2(
+			elm$core$Set$insert,
+			_Utils_Tuple2(i, j),
+			model.edgeR) : model.edgeR;
+		var edgeR2 = A3(author$project$Graph$hasVertex, i - 1, j, model) ? A2(
+			elm$core$Set$insert,
+			_Utils_Tuple2(i - 1, j),
+			edgeR) : edgeR;
+		var edgeC = A3(author$project$Graph$hasVertex, i, j + 1, model) ? A2(
+			elm$core$Set$insert,
+			_Utils_Tuple2(i, j),
+			model.edgeC) : model.edgeC;
+		var edgeC2 = A3(author$project$Graph$hasVertex, i, j - 1, model) ? A2(
+			elm$core$Set$insert,
+			_Utils_Tuple2(i, j - 1),
+			edgeC) : edgeC;
+		return _Utils_update(
+			model,
+			{edgeC: edgeC2, edgeR: edgeR2, vertex: vertex});
+	});
 var elm$core$Basics$composeL = F3(
 	function (g, f, x) {
 		return g(
 			f(x));
 	});
-var elm$core$Basics$not = _Basics_not;
 var elm$json$Json$Encode$array = F2(
 	function (func, entries) {
 		return _Json_wrap(
@@ -5898,30 +5950,33 @@ var author$project$Graph$update = F2(
 							elm$json$Json$Encode$int(ySize)),
 							_Utils_Tuple2('maze', mazeMatrix)
 						]));
-				return _Utils_Tuple2(
+				return author$project$Graph$isEmptyMaze(model.vertex) ? _Utils_Tuple2(model, elm$core$Platform$Cmd$none) : _Utils_Tuple2(
 					model,
 					author$project$Graph$finalGridGraph(submitJson));
 			case 'MazeCreated':
-				var result = msg.a;
-				if (result.$ === 'Ok') {
-					var arr = result.a;
-					var routesize = A3(
-						elm$core$Array$foldl,
-						elm$core$Basics$max,
-						0,
-						A2(
-							elm$core$Array$map,
-							A2(elm$core$Array$foldl, elm$core$Basics$max, 0),
-							arr)) + 2;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{maze: arr, routeDistance: ((routesize * 6) / 5) | 0, routeRatio: 0, showRoute: false}),
-						elm$core$Platform$Cmd$none);
-				} else {
-					var err = result.a;
-					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
-				}
+				var arr = msg.a;
+				var routesize = A3(
+					elm$core$Array$foldl,
+					elm$core$Basics$max,
+					0,
+					A2(
+						elm$core$Array$map,
+						A2(elm$core$Array$foldl, elm$core$Basics$max, 0),
+						arr)) + 2;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{maze: arr, routeDistance: ((routesize * 6) / 5) | 0, routeRatio: 0, showRoute: false}),
+					elm$core$Platform$Cmd$none);
+			case 'FailedCreateMaze':
+				var err = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							mazeConverted: elm$core$Maybe$Just(err)
+						}),
+					elm$core$Platform$Cmd$none);
 			case 'AnimeFrame':
 				var time = msg.a;
 				var newTime = model.routeRatio + (time / 5000);
@@ -5938,9 +5993,6 @@ var author$project$Graph$update = F2(
 var author$project$Main$Done = {$: 'Done'};
 var author$project$Main$Error = function (a) {
 	return {$: 'Error', a: a};
-};
-var author$project$Main$GotGraphMsg = function (a) {
-	return {$: 'GotGraphMsg', a: a};
 };
 var author$project$Main$ImageLoaded = function (a) {
 	return {$: 'ImageLoaded', a: a};
@@ -6296,11 +6348,6 @@ var elm$core$Array$toIndexedList = function (array) {
 		_Utils_Tuple2(len - 1, _List_Nil),
 		array).b;
 };
-var elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
 var elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -6635,6 +6682,7 @@ var elm$html$Html$Events$onClick = function (msg) {
 		'click',
 		elm$json$Json$Decode$succeed(msg));
 };
+var elm$svg$Svg$text = elm$virtual_dom$VirtualDom$text;
 var author$project$Graph$view = function (model) {
 	var _n0 = author$project$Graph$getSize(model);
 	var xInd = _n0.a;
@@ -6680,6 +6728,22 @@ var author$project$Graph$view = function (model) {
 					[
 						elm$html$Html$text(
 						model.showRoute ? 'hide answer' : 'show answer')
+					])),
+				A2(
+				elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						function () {
+						var _n1 = model.mazeConverted;
+						if (_n1.$ === 'Nothing') {
+							return elm$svg$Svg$text('ok');
+						} else {
+							var err = _n1.a;
+							return elm$svg$Svg$text(
+								elm$json$Json$Decode$errorToString(err));
+						}
+					}()
 					]))
 			]));
 };

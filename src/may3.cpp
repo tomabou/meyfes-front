@@ -4,7 +4,7 @@
 #include <cmath>
 #include <random>
 //枠の長さ
-const int N = 1000;
+const int N = 100;
 //でかい数
 const int M = 100000;
 //地の部分で辺が続けて伸びる確率
@@ -2912,6 +2912,7 @@ vector<int> main_calc(int tate, int yoko, int n, int *vertex, int m, int *edge)
     {
         for (int j = 0; j < N; j++)
         {
+            a[i][j].key = 0;
             a[i][j].dot = 0;
             a[i][j].left = 0;
             a[i][j].right = 0;
@@ -2924,11 +2925,13 @@ vector<int> main_calc(int tate, int yoko, int n, int *vertex, int m, int *edge)
     {
         for (int j = 0; j < 2 * N; j++)
         {
+            c[i][j].key = 0;
             c[i][j].dot = 0;
             c[i][j].left = 0;
             c[i][j].right = 0;
             c[i][j].up = 0;
-            d[i][j].down = 0;
+            c[i][j].down = 0;
+            d[i][j].key = 0;
             d[i][j].dot = 0;
             d[i][j].left = 0;
             d[i][j].right = 0;
@@ -2936,6 +2939,11 @@ vector<int> main_calc(int tate, int yoko, int n, int *vertex, int m, int *edge)
             d[i][j].down = 0;
         }
     }
+    while (!rightway.empty())
+    {
+        rightway.pop(); // 先頭要素を削除
+    }
+
     //頂点の入力
     for (int i = 0; i < n; i++)
     {
@@ -2947,10 +2955,10 @@ vector<int> main_calc(int tate, int yoko, int n, int *vertex, int m, int *edge)
     //辺の入力
     for (int i = 0; i < m; i++)
     {
-        x = edge[i * 2];
-        y = edge[i * 2 + 1];
-        z = edge[i * 2 + 2];
-        w = edge[i * 2 + 3];
+        x = edge[i * 4];
+        y = edge[i * 4 + 1];
+        z = edge[i * 4 + 2];
+        w = edge[i * 4 + 3];
         if (x == z)
         {
             if (y == w + 1)
@@ -3060,7 +3068,7 @@ vector<int> main_calc(int tate, int yoko, int n, int *vertex, int m, int *edge)
                 }
                 else
                 {
-                    answer.push_back(0);
+                    answer.push_back(1);
                     continue;
                 }
             }

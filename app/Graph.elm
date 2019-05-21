@@ -21,6 +21,9 @@ import Tuple exposing (first, second)
 port finalGridGraph : Json.Encode.Value -> Cmd msg
 
 
+port createdMaze : (Json.Encode.Value -> msg) -> Sub msg
+
+
 type alias Model =
     { vertex : Array (Array Bool)
     , edgeR : Set.Set ( Int, Int )
@@ -29,6 +32,7 @@ type alias Model =
     , routeRatio : Float
     , routeDistance : Int
     , showRoute : Bool
+    , mazeConverted : Maybe Json.Decode.Error
     }
 
 
@@ -42,7 +46,8 @@ type alias GraphInfo =
 type Msg
     = ChangeNode Int Int
     | SubmitGraph
-    | MazeCreated (Result Http.Error (Array (Array Int)))
+    | MazeCreated (Array (Array Int))
+    | FailedCreateMaze Json.Decode.Error
     | AnimeFrame Float
     | ShowRoute
 
@@ -74,7 +79,13 @@ initial x y =
     , routeRatio = 0
     , routeDistance = 0
     , showRoute = False
+    , mazeConverted = Nothing
     }
+
+
+isEmptyMaze : Array (Array Bool) -> Bool
+isEmptyMaze =
+    Array.map (foldl (||) False) >> foldl (||) False >> not
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -110,21 +121,23 @@ update msg model =
                 submitJson =
                     Json.Encode.object [ ( "x", Json.Encode.int xSize ), ( "y", Json.Encode.int ySize ), ( "maze", mazeMatrix ) ]
             in
-            ( model
-            , finalGridGraph submitJson
-            )
+            if isEmptyMaze model.vertex then
+                ( model, Cmd.none )
 
-        MazeCreated result ->
-            case result of
-                Ok arr ->
-                    let
-                        routesize =
-                            foldl Basics.max 0 (Array.map (foldl Basics.max 0) arr) + 2
-                    in
-                    ( { model | maze = arr, routeDistance = routesize * 6 // 5, showRoute = False, routeRatio = 0 }, Cmd.none )
+            else
+                ( model
+                , finalGridGraph submitJson
+                )
 
-                Err err ->
-                    ( model, Cmd.none )
+        MazeCreated arr ->
+            let
+                routesize =
+                    foldl Basics.max 0 (Array.map (foldl Basics.max 0) arr) + 2
+            in
+            ( { model | maze = arr, routeDistance = routesize * 6 // 5, showRoute = False, routeRatio = 0 }, Cmd.none )
+
+        FailedCreateMaze err ->
+            ( { model | mazeConverted = Just err }, Cmd.none )
 
         AnimeFrame time ->
             let
@@ -236,6 +249,14 @@ view model =
                  else
                     "show answer"
                 )
+            ]
+        , Html.div []
+            [ case model.mazeConverted of
+                Nothing ->
+                    text "ok"
+
+                Just err ->
+                    text (Json.Decode.errorToString err)
             ]
         ]
 
@@ -453,4 +474,13 @@ calcEdgeR set =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Browser.Events.onAnimationFrameDelta AnimeFrame
+    let
+        func value =
+            case Json.Decode.decodeValue mazeDecoder value of
+                Ok maze ->
+                    MazeCreated maze
+
+                Err err ->
+                    FailedCreateMaze err
+    in
+    createdMaze func

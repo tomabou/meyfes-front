@@ -1,19 +1,28 @@
-const wasm_test = (edge_array, vertex_array) => {
+let wrap_create_maze
+
+Module.onRuntimeInitialized = () => {
+    wrap_create_maze = Module.cwrap("create_maze"
+        , "number",
+        ["number", "number", "number", "array", "number", "array", "number"]);
+}
+
+const wasm_test = (x, y, vertex_array, edge_array) => {
     const tate = 3;
     const yoko = 4;
     const vertex = new Uint8Array(new Uint32Array(vertex_array).buffer);
     const edge = new Uint8Array(new Uint32Array(edge_array).buffer);
-    const vlen = vertex_array.length;
-    const elen = edge_array.length;
-    const buf_size = vlen * elen * 4;
+    const vlen = Math.floor(vertex_array.length / 2);
+    const elen = Math.floor(edge_array.length / 4);
+    const buf_size = x * y * 16;
+    console.log(buf_size);
+    console.log(vlen, elen);
     const maze_buf = Module._malloc(buf_size * 4);
     Module.ccall("create_maze"
         , "number",
-        ["number", "number", "number", "array", "number", "array", "number"],
-        [tate, yoko, vlen, vertex, elen, edge, maze_buf])
+        ["number", "number", "number", "array", "number", "array", "number"]
+        , [tate, yoko, vlen, vertex, elen, edge, maze_buf]);
     const intPtr = Module.HEAP32.subarray(maze_buf / 4, maze_buf / 4 + buf_size);
     const len = intPtr[0];
-    console.log(len);
     let ans = [[]];
     let ans_index = 0;
     for (let i = 1; i <= len; i++) {
@@ -23,11 +32,13 @@ const wasm_test = (edge_array, vertex_array) => {
             ans_index = ans_index + 1;
             continue;
         }
-        ans[ans_index].push(intPtr[i]);
+        ans[ans_index].push(j);
     }
-    ans.pop(); ans.pop();
     console.log(ans);
+    ans.pop(); ans.pop();
     Module._free(maze_buf);
+    const transpose = a => a[0].map((_, c) => a.map(r => r[c]));
+    return transpose(ans);
 }
 
 const image_port_func = data => {
