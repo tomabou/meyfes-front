@@ -17,6 +17,7 @@ struct node
     int key;
     bool dot;
     bool left, right, up, down;
+    bool rway;
 };
 
 node a[N][N];         //入力グラフの配列
@@ -415,9 +416,19 @@ void makemazeblank(int tate, int yoko)
         }
     }
     //縦横比からxmin,ymin,xmax,ymaxを変更
-    if ((xmax - xmin + 1) * tate > (ymax - ymin + 1) * yoko)
+    if ((xmax - xmin + 1) * tate >= (ymax - ymin + 1) * yoko)
     {
         //ymax += (xmax - xmin + 1) * tate / yoko - ymax + ymin - 1;
+        for (int i = 0; i < 2 * N; i++)
+        {
+            for (int j = 0; j < 2 * N; j++)
+            {
+                if (c[i][j].dot == 1)
+                {
+                    c[i][j].rway = 1;
+                }
+            }
+        }
     }
     else if ((xmax - xmin + 1) * tate < (ymax - ymin + 1) * yoko)
     {
@@ -435,6 +446,7 @@ void makemazeblank(int tate, int yoko)
                 {
                     c[i][j].dot = 0;
                     d[i + differ / 2][j].dot = 1;
+                    c[i + differ / 2][j].rway = 1;
                 }
                 if (c[i][j].left == 1)
                 {
@@ -2931,12 +2943,14 @@ vector<int> main_calc(int tate, int yoko, int n, int *vertex, int m, int *edge)
             c[i][j].right = 0;
             c[i][j].up = 0;
             c[i][j].down = 0;
+            c[i][j].rway = 0;
             d[i][j].key = 0;
             d[i][j].dot = 0;
             d[i][j].left = 0;
             d[i][j].right = 0;
             d[i][j].up = 0;
             d[i][j].down = 0;
+            d[i][j].rway = 0;
         }
     }
     while (!rightway.empty())
@@ -3020,6 +3034,11 @@ vector<int> main_calc(int tate, int yoko, int n, int *vertex, int m, int *edge)
                 answer.push_back(3);
                 continue;
             }
+            if (c[(i - 1) / 2][(j - 1) / 2].rway == 1 && i % 2 == 1 && j % 2 == 1)
+            {
+                answer.push_back(4);
+                continue;
+            }
             if (i != xmax * 2 + 2)
             {
                 if (i == xmin * 2 || j == ymax * 2 + 2 || j == ymin * 2)
@@ -3033,6 +3052,17 @@ vector<int> main_calc(int tate, int yoko, int n, int *vertex, int m, int *edge)
                 answer.push_back(1);
                 continue;
             }
+            if (i % 2 == 1 && j % 2 == 0 && c[i / 2][(j - 1) / 2].rway == 1 && c[i / 2][j / 2].rway == 1 && c[i / 2][j / 2].down == 1)
+            {
+                answer.push_back(4);
+                continue;
+            }
+            if (i % 2 == 0 && j % 2 == 1 && c[(i - 1) / 2][j / 2].rway == 1 && c[i / 2][j / 2].rway == 1 && c[i / 2][j / 2].left == 1)
+            {
+                answer.push_back(4);
+                continue;
+            }
+
             if (i % 2 == 1 && j % 2 == 1)
             {
                 if (c[i / 2][j / 2].dot == 1)
