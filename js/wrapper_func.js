@@ -80,7 +80,7 @@ const run_wasm = (x, y, vertex_array, edge_array) => {
     ans.pop(); ans.pop();
     Module._free(maze_buf);
     const transpose = a => a[0].map((_, c) => a.map(r => r[c]));
-    return transpose(ans);
+    return transpose(ans.reverse());
 }
 
 const image_port_func = data => {
