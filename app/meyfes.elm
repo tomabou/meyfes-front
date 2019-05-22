@@ -3,6 +3,8 @@ port module Main exposing (main)
 import Array
 import Browser
 import Browser.Events
+import Canvas as C
+import Color exposing (Color)
 import Constant exposing (..)
 import File exposing (File)
 import File.Select as Select
@@ -111,6 +113,7 @@ view model =
         , div [ class "wrapper", class "clearfix" ]
             [ main_ [ class "main" ]
                 [ viewImage model
+                , viewCanvas model
                 , viewConverted model
                 , Html.map GotGraphMsg (Graph.view model.gridGraph)
                 ]
@@ -122,10 +125,33 @@ view model =
 viewHeader : Model -> Html Msg
 viewHeader model =
     header [ class "header" ]
-        [ h1 [ class "title", href urlPrefix ]
+        [ h1 [ class "title", href urlPrefix, id "header_id" ]
             [ text "Maze Creator"
             ]
         ]
+
+
+viewCanvas : Model -> Html Msg
+viewCanvas model =
+    let
+        width =
+            500
+
+        height =
+            300
+    in
+    div []
+        [ C.toHtml ( width, height )
+            [ style "border" "1px solid black", id "canvas" ]
+            [ C.shapes [ C.fill Color.green ] [ C.rect ( 0, 0 ) width height ]
+            , renderSquare
+            ]
+        ]
+
+
+renderSquare =
+    C.shapes [ C.fill (Color.rgba 0.5 0.5 0.5 0.5) ]
+        [ C.rect ( 0, 0 ) 100 50 ]
 
 
 viewImage : Model -> Html Msg

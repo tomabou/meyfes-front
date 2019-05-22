@@ -10,16 +10,18 @@
 	<script src="js/index.js"></script>
 	<script src="js/may3.js"></script>
 	<script src="js/wrapper_func.js"></script>
+	<script src="http://unpkg.com/elm-canvas/elm-canvas.js"></script>
 </head>
 
 <body>
 	<div id="elm"></div>
 	<script>
-		var app = Elm.Main.init({
+		const app = Elm.Main.init({
 			node: document.getElementById('elm'),
 		});
 		app.ports.imageString.subscribe(image_port_func);
 		app.ports.finalGridGraph.subscribe(maze_port_func);
+
 
 	</script>
 </body>
