@@ -8,3 +8,4 @@ package.json
 js/may3.js
 js/may3.wasm
 js/index.js
+!js/*

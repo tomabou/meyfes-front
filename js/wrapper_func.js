@@ -64,7 +64,6 @@ const create_grid_graph = yoko => {
     const canv = document.getElementById('main_canvas');
     const ctx = canv.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canv.width, canv.height);
-    console.log(imageData.data.length);
     const tate = Math.floor(yoko * 3 / 4)
     const get_color = get_color_func(imageData, yoko, tate);
     const vertex = [];
@@ -80,7 +79,6 @@ const create_grid_graph = yoko => {
         "edgeR": edgeR,
         "edgeC": edgeC
     }
-    console.log(res);
     app.ports.gridGraph.send(res);
 }
 
