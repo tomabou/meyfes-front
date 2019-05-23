@@ -1,4 +1,4 @@
-module Drawing exposing (DrawingPointer, Model, Msg(..), col, colorButton, colorButtons, controlPoint, drawLine, drawPoint, eventDecoder, finalPoint, flushPendingToDraw, getShadowColor, h, incFrames, init, initialPoint, main, offsetDecoder, onTouch, padding, selectColor, selectSize, sizeControls, subscriptions, touchCoordinates, update, view, w)
+module Drawing exposing (DrawingPointer, Model, Msg(..), colorButton, colorButtons, controlPoint, drawLine, drawPoint, eventDecoder, finalPoint, flushPendingToDraw, getShadowColor, h, incFrames, init, initialPoint, main, offsetDecoder, onTouch, padding, selectColor, selectSize, sizeControls, subscriptions, touchCoordinates, update, view, w)
 
 import Array exposing (Array)
 import Browser
@@ -60,6 +60,7 @@ type Msg
     | EndAt ( Float, Float )
     | SelectColor Color
     | SelectSize Int
+    | ResetCanvas
 
 
 init : () -> ( Model, Cmd Msg )
@@ -107,8 +108,16 @@ update msg ({ frames, drawingPointer, pending, toDraw } as model) =
 
         SelectSize size ->
             selectSize size model
+
+        ResetCanvas ->
+            resetCanvas model
     , Cmd.none
     )
+
+
+resetCanvas : Model -> Model
+resetCanvas ({ pending } as model) =
+    { model | pending = Array.push (shapes [ fill Color.white ] [ rect ( 0, 0 ) w h ]) pending }
 
 
 incFrames ({ frames } as model) =
@@ -212,6 +221,7 @@ view { color, size, toDraw } =
             ]
             [ sizeControls color size
             , colorButtons color
+            , Html.button [ Html.Events.onClick ResetCanvas ] [ Html.text "Reset Canvas" ]
             ]
         ]
 
@@ -288,7 +298,7 @@ colorButtons selectedColor =
     let
         layout colors =
             colors
-                |> List.map (List.map (colorButton selectedColor) >> col)
+                |> List.map (colorButton selectedColor)
     in
     div
         [ style "display" "flex"
@@ -297,50 +307,9 @@ colorButtons selectedColor =
         ]
     <|
         layout
-            [ [ Color.lightRed
-              , Color.red
-              , Color.darkRed
-              ]
-            , [ Color.lightOrange
-              , Color.orange
-              , Color.darkOrange
-              ]
-            , [ Color.lightYellow
-              , Color.yellow
-              , Color.darkYellow
-              ]
-            , [ Color.lightGreen
-              , Color.green
-              , Color.darkGreen
-              ]
-            , [ Color.lightBlue
-              , Color.blue
-              , Color.darkBlue
-              ]
-            , [ Color.lightPurple
-              , Color.purple
-              , Color.darkPurple
-              ]
-            , [ Color.lightBrown
-              , Color.brown
-              , Color.darkBrown
-              ]
-            , [ Color.white
-              , Color.lightGrey
-              , Color.grey
-              ]
-            , [ Color.darkGrey
-              , Color.lightCharcoal
-              , Color.charcoal
-              ]
-            , [ Color.darkCharcoal
-              , Color.black
-              ]
+            [ Color.lightBlue
+            , Color.white
             ]
-
-
-col btns =
-    div [] btns
 
 
 colorButton selectedColor color =
