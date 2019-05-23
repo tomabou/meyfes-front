@@ -23,7 +23,7 @@ const get_color_func = (imageData, yoko, tate) => (
         const y_pos = Math.floor((y + 1) * imageData.height / (tate + 1));
         const x_pos = Math.floor((x + 1) * imageData.width / (yoko + 1));
         const red = imageData.data[((y_pos * (imageData.width * 4)) + (x_pos * 4))];
-        return red < 150;
+        return red < 230;
     });
 
 const create_edge_list = (vertex, tate, yoko) => {

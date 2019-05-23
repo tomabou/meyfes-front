@@ -1,4 +1,4 @@
-module Drawing exposing (DrawingPointer, Model, Msg(..), colorButton, colorButtons, controlPoint, drawLine, drawPoint, eventDecoder, finalPoint, flushPendingToDraw, getShadowColor, h, incFrames, init, initialPoint, main, offsetDecoder, onTouch, padding, selectColor, selectSize, sizeControls, subscriptions, touchCoordinates, update, view, w)
+module Drawing exposing (DrawingPointer, Model, Msg(..), init, onTouch, subscriptions, update, view)
 
 import Array exposing (Array)
 import Browser
@@ -34,11 +34,6 @@ w =
     750
 
 
-padding : number
-padding =
-    20
-
-
 type alias DrawingPointer =
     { previousMidpoint : Point, lastPoint : Point }
 
@@ -69,8 +64,8 @@ init _ =
       , pending = Array.empty
       , toDraw = [ shapes [ fill Color.white ] [ rect ( 0, 0 ) w h ] ]
       , drawingPointer = Nothing
-      , color = Color.lightBlue
-      , size = 20
+      , color = Color.rgb255 208 60 86
+      , size = 40
       }
     , Cmd.none
     )
@@ -199,7 +194,9 @@ getShadowColor color =
 
 view : Model -> Html Msg
 view { color, size, toDraw } =
-    div []
+    div
+        [ Html.Attributes.width 750
+        ]
         [ Canvas.toHtml ( w, h )
             [ style "touch-action" "none"
             , Mouse.onDown (.offsetPos >> StartAt)
@@ -216,13 +213,26 @@ view { color, size, toDraw } =
             ]
             toDraw
         , div
-            [ style "max-width" (String.fromInt (w - 20) ++ "px")
-            , style "padding" "10px"
+            [ style "width" (String.fromInt w ++ "px")
+            , style "height" "70px"
+            , style "padding" "5px"
+            , style "vertical-align" "top"
             ]
             [ sizeControls color size
             , colorButtons color
-            , Html.button [ Html.Events.onClick ResetCanvas ] [ Html.text "Reset Canvas" ]
+            , resetButton
             ]
+        ]
+
+
+resetButton =
+    Html.div
+        [ style "display" "inline-block"
+        , style "height" "70"
+        ]
+        [ Html.button
+            [ Html.Events.onClick ResetCanvas, Html.Attributes.class "btn-flat-border2" ]
+            [ Html.text "Reset Canvas" ]
         ]
 
 
@@ -238,7 +248,7 @@ sizeControls selectedColor selectedSize =
             brushes * inc
 
         controls =
-            List.range 0 brushes
+            List.range 2 brushes
                 |> List.map
                     (\i ->
                         let
@@ -246,16 +256,14 @@ sizeControls selectedColor selectedSize =
                                 max 2 (i * inc)
                         in
                         button
-                            [ style "-webkit-appearance" "none"
-                            , style "-moz-appearance" "none"
-                            , style "display" "block"
+                            [ style "display" "inline-block"
+                            , style "vertical-align" "middle"
                             , style "background-color" "transparent"
                             , style "border" "none"
-                            , style "margin" "5px"
+                            , style "margin" "5px 13px"
                             , style "padding" "0"
-                            , style "min-width" (String.fromInt 30 ++ "px")
-                            , style "min-height" (String.fromInt buttonSize ++ "px")
-                            , style "outline" "none"
+                            , style "width" (String.fromInt size ++ "px")
+                            , style "height" (String.fromInt size ++ "px")
                             , onClick (SelectSize size)
                             ]
                             [ div
@@ -286,10 +294,10 @@ sizeControls selectedColor selectedSize =
                     )
     in
     div
-        [ style "display" "flex"
-        , style "flex-direction" "row"
-        , style "justify-content" "space-around"
-        , style "align-items" "center"
+        [ style "display" "inline-block"
+        , style "vertical-align" "top"
+        , style "width" "350px"
+        , style "height" "70px"
         ]
         controls
 
@@ -301,24 +309,25 @@ colorButtons selectedColor =
                 |> List.map (colorButton selectedColor)
     in
     div
-        [ style "display" "flex"
-        , style "flex-direction" "row"
-        , style "justify-content" "space-around"
+        [ style "display" "inline-block"
+        , style "width" "160px"
+        , style "height" "70px"
+        , style "vertical-align" "top"
         ]
     <|
         layout
-            [ Color.lightBlue
+            [ Color.rgb255 208 60 86
             , Color.white
             ]
 
 
 colorButton selectedColor color =
     button
-        [ style "border-radius" "50%"
+        [ style "border-radius" "20%"
         , style "background-color" (Color.toCssString color)
-        , style "display" "block"
-        , style "width" "40px"
-        , style "height" "40px"
+        , style "display" "inline-block"
+        , style "width" "60px"
+        , style "height" "60px"
         , style "margin" "5px"
         , style "border" "2px solid white"
         , style "box-shadow"

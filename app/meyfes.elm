@@ -159,7 +159,10 @@ viewGraphCreator model =
         x =
             floor (toFloat model.gridGraphSize / 5)
     in
-    div []
+    div
+        [ style "width" "750px"
+        , style "height" "60px"
+        ]
         [ button [ onClick CreateGridGraph ] [ text "Create Grid Graph" ]
         , button [ onClick <| ChangeSize -x ] [ text "size down" ]
         , button [ onClick <| ChangeSize x ] [ text "size up" ]
