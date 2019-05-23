@@ -18,8 +18,60 @@ const test_function = () => {
     }
 }
 
+const get_color_func = (imageData, yoko, tate) => (
+    (x, y) => {
+        const y_pos = Math.floor((y + 1) * imageData.height / (tate + 1));
+        const x_pos = Math.floor((x + 1) * imageData.width / (yoko + 1));
+        const blue = imageData.data[((y_pos * (imageData.width * 4)) + (x_pos * 4)) + 2];
+        return blue > 1;
+    });
+
+const create_edge_list = (vertex_list, tate, yoko) => {
+    const edgeC = []
+    for (let i = 0; i < yoko; i++) {
+        for (let j = 0; j < tate - 1; j++) {
+            if (vertex_list[i][j] && vertex_list[i][j + 1]) {
+                edgeC.push(i * 1000 + j);
+            }
+        }
+    }
+    const edgeR = []
+    for (let i = 0; i < yoko - 1; i++) {
+        for (let j = 0; j < tate; j++) {
+            if (vertex_list[i][j] && vertex_list[i + 1][j]) {
+                edgeR.push(i * 1000 + j);
+            }
+        }
+    }
+    return [edgeR, edgeC]
+}
+
+
+const create_grid_graph = yoko => {
+    const canv = document.getElementById('main_canvas');
+    const ctx = canv.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canv.width, canv.height);
+    console.log(imageData.data.length);
+    const tate = Math.floor(yoko * 3 / 4)
+    const get_color = get_color_func(imageData, yoko, tate);
+    const vertex = [];
+    for (let i = 0; i < yoko; i++) {
+        vertex.push([]);
+        for (let j = 0; j < tate; j++) {
+            vertex[i].push(get_color(i, j));
+        }
+    }
+    const [edgeR, edgeC] = create_edge_list(vertex, tate, yoko);
+    const res = {
+        "vertex": vertex,
+        "edgeR": edgeR,
+        "edgeC": edgeC
+    }
+    console.log(res);
+}
+
 const maze_port_func = data => {
-    test_function()
+    create_grid_graph(30);
     const x = data.x;
     const y = data.y;
     const maze = data.maze;
