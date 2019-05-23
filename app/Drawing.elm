@@ -31,7 +31,7 @@ h =
 
 w : number
 w =
-    500
+    750
 
 
 padding : number

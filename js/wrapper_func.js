@@ -8,7 +8,7 @@ Module.onRuntimeInitialized = () => {
 
 
 const test_function = () => {
-    const canv = document.getElementById('canvas');
+    const canv = document.getElementById('main_canvas');
     const ctx = canv.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canv.width, canv.height);
     console.log(imageData.data.length)
