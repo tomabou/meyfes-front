@@ -163,10 +163,12 @@ viewMaze model =
         threshold =
             floor (toFloat model.routeDistance * model.routeRatio) + 2
     in
-    svg
-        [ viewBox ("0 0 " ++ String.fromInt (i * 10) ++ " " ++ String.fromInt (j * 10)), class "svg_model" ]
-        [ rect [ class "maze_background", x "0", y "0", width (String.fromInt (i * 10)), height (String.fromInt (j * 10)) ] []
-        , Svg.Lazy.lazy2 viewMazeWall model.maze threshold
+    Html.div [ Html.Attributes.class "maze-svg" ]
+        [ svg
+            [ viewBox ("0 0 " ++ String.fromInt (i * 10) ++ " " ++ String.fromInt (j * 10)), class "svg_model" ]
+            [ rect [ class "maze_background", x "0", y "0", width (String.fromInt (i * 10)), height (String.fromInt (j * 10)) ] []
+            , Svg.Lazy.lazy2 viewMazeWall model.maze threshold
+            ]
         ]
 
 
@@ -239,25 +241,23 @@ view model =
             [ viewEdge model
             , Html.Lazy.lazy viewVertex model.vertex
             ]
-        , Html.button [ Html.Events.onClick SubmitGraph, Html.Attributes.class "btn-flat-border" ] [ Html.text "submit graph" ]
+        , Html.button [ Html.Events.onClick SubmitGraph, Html.Attributes.class "btn-flat-border" ] [ Html.text "Submit Graph" ]
         , viewMaze model
         , Html.button [ Html.Events.onClick ShowRoute, Html.Attributes.class "btn-flat-border" ]
             [ Html.text
                 (if model.showRoute then
-                    "hide answer"
+                    "Hide Answer"
 
                  else
-                    "show answer"
+                    "Show Answer"
                 )
             ]
-        , Html.div []
-            [ case model.mazeConverted of
-                Nothing ->
-                    text "ok"
+        , case model.mazeConverted of
+            Nothing ->
+                Html.div [] []
 
-                Just err ->
-                    text (Json.Decode.errorToString err)
-            ]
+            Just err ->
+                text (Json.Decode.errorToString err)
         ]
 
 

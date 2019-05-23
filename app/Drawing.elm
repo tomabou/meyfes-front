@@ -217,6 +217,7 @@ view { color, size, toDraw } =
             , style "height" "70px"
             , style "padding" "5px"
             , style "vertical-align" "top"
+            , style "margin" "3px 0px 0px"
             ]
             [ sizeControls color size
             , colorButtons color

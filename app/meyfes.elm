@@ -146,7 +146,6 @@ view model =
                 , Html.map GotDrawingMsg (Drawing.view model.drawCanvas)
                 , viewGraphCreator model
                 , Html.map GotGraphMsg (Graph.view model.gridGraph)
-                , viewConverted model
                 ]
             ]
         , footer [ class "footer" ] []
@@ -161,11 +160,12 @@ viewGraphCreator model =
     in
     div
         [ style "width" "750px"
-        , style "height" "60px"
+        , style "height" "80px"
+        , style "margin" "20px 0px 0px"
         ]
-        [ button [ onClick CreateGridGraph ] [ text "Create Grid Graph" ]
-        , button [ onClick <| ChangeSize -x ] [ text "size down" ]
-        , button [ onClick <| ChangeSize x ] [ text "size up" ]
+        [ div [ class "btn-wrap" ] [ button [ onClick CreateGridGraph, class "btn-flat-border" ] [ text "Create Graph" ] ]
+        , div [ class "btn-wrap" ] [ button [ onClick <| ChangeSize x, class "btn-flat-border3" ] [ text "＋" ] ]
+        , div [ class "btn-wrap" ] [ button [ onClick <| ChangeSize -x, class "btn-flat-border3" ] [ text "−" ] ]
         ]
 
 
