@@ -22,6 +22,9 @@ import Task
 port imageString : E.Value -> Cmd msg
 
 
+port createGridGraph : Int -> Cmd msg
+
+
 port gridGraph : (E.Value -> msg) -> Sub msg
 
 
@@ -43,6 +46,7 @@ type State
 
 type alias Model =
     { image : Maybe String
+    , gridGraphSize : Int
     , gridGraph : Graph.Model
     , drawCanvas : Drawing.Model
     , converteState : State
@@ -55,7 +59,7 @@ init _ =
         ( cnv, cmd ) =
             Drawing.init ()
     in
-    ( Model Nothing (Graph.initial 30 20) cnv NotYet, Cmd.none )
+    ( Model Nothing 30 (Graph.initial 30 20) cnv NotYet, Cmd.none )
 
 
 type Msg
@@ -66,6 +70,8 @@ type Msg
     | GraphCreated Graph.GraphInfo
     | GotGraphMsg Graph.Msg
     | GotDrawingMsg Drawing.Msg
+    | CreateGridGraph
+    | ChangeSize Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -114,6 +120,16 @@ update msg model =
             in
             ( { model | drawCanvas = drawing }, Cmd.map GotDrawingMsg cmd )
 
+        CreateGridGraph ->
+            ( model, createGridGraph model.gridGraphSize )
+
+        ChangeSize diff ->
+            let
+                newSize =
+                    Basics.max 5 <| Basics.min 80 (diff + model.gridGraphSize)
+            in
+            ( { model | gridGraphSize = newSize }, createGridGraph newSize )
+
 
 imageDecoder : Decoder String
 imageDecoder =
@@ -128,11 +144,25 @@ view model =
             [ main_ [ class "main" ]
                 [ viewImage model
                 , Html.map GotDrawingMsg (Drawing.view model.drawCanvas)
-                , viewConverted model
+                , viewGraphCreator model
                 , Html.map GotGraphMsg (Graph.view model.gridGraph)
+                , viewConverted model
                 ]
             ]
         , footer [ class "footer" ] []
+        ]
+
+
+viewGraphCreator : Model -> Html Msg
+viewGraphCreator model =
+    let
+        x =
+            floor (toFloat model.gridGraphSize / 5)
+    in
+    div []
+        [ button [ onClick CreateGridGraph ] [ text "Create Grid Graph" ]
+        , button [ onClick <| ChangeSize -x ] [ text "size down" ]
+        , button [ onClick <| ChangeSize x ] [ text "size up" ]
         ]
 
 

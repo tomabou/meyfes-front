@@ -85,7 +85,6 @@ const create_grid_graph = yoko => {
 }
 
 const maze_port_func = data => {
-    create_grid_graph(30);
     const x = data.x;
     const y = data.y;
     const maze = data.maze;
