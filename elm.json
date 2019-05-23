@@ -18,7 +18,8 @@
             "elm/svg": "1.0.1",
             "elm/time": "1.0.0",
             "elm/url": "1.0.0",
-            "joakin/elm-canvas": "3.0.5"
+            "joakin/elm-canvas": "3.0.5",
+            "mpizenberg/elm-pointer-events": "4.0.1"
         },
         "indirect": {
             "elm/bytes": "1.0.3",

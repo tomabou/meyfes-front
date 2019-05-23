@@ -6,6 +6,7 @@ import Browser.Events
 import Canvas as C
 import Color exposing (Color)
 import Constant exposing (..)
+import Drawing
 import File exposing (File)
 import File.Select as Select
 import Graph
@@ -43,13 +44,18 @@ type State
 type alias Model =
     { image : Maybe String
     , gridGraph : Graph.Model
+    , drawCanvas : Drawing.Model
     , converteState : State
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model Nothing (Graph.initial 30 20) NotYet, Cmd.none )
+    let
+        ( cnv, cmd ) =
+            Drawing.init ()
+    in
+    ( Model Nothing (Graph.initial 30 20) cnv NotYet, Cmd.none )
 
 
 type Msg
@@ -59,6 +65,7 @@ type Msg
     | FailedCreateGraph Json.Decode.Error
     | GraphCreated Graph.GraphInfo
     | GotGraphMsg Graph.Msg
+    | GotDrawingMsg Drawing.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -100,6 +107,13 @@ update msg model =
             in
             ( { model | gridGraph = graph }, Cmd.map GotGraphMsg cmd )
 
+        GotDrawingMsg drawingMsg ->
+            let
+                ( drawing, cmd ) =
+                    Drawing.update drawingMsg model.drawCanvas
+            in
+            ( { model | drawCanvas = drawing }, Cmd.map GotDrawingMsg cmd )
+
 
 imageDecoder : Decoder String
 imageDecoder =
@@ -113,7 +127,7 @@ view model =
         , div [ class "wrapper", class "clearfix" ]
             [ main_ [ class "main" ]
                 [ viewImage model
-                , viewCanvas model
+                , Html.map GotDrawingMsg (Drawing.view model.drawCanvas)
                 , viewConverted model
                 , Html.map GotGraphMsg (Graph.view model.gridGraph)
                 ]
@@ -129,29 +143,6 @@ viewHeader model =
             [ text "Maze Creator"
             ]
         ]
-
-
-viewCanvas : Model -> Html Msg
-viewCanvas model =
-    let
-        width =
-            500
-
-        height =
-            300
-    in
-    div []
-        [ C.toHtml ( width, height )
-            [ style "border" "1px solid black", id "canvas" ]
-            [ C.shapes [ C.fill Color.green ] [ C.rect ( 0, 0 ) width height ]
-            , renderSquare
-            ]
-        ]
-
-
-renderSquare =
-    C.shapes [ C.fill (Color.rgba 0.5 0.5 0.5 0.5) ]
-        [ C.rect ( 0, 0 ) 100 50 ]
 
 
 viewImage : Model -> Html Msg
@@ -232,4 +223,5 @@ subscriptions model =
     Sub.batch
         [ sub1
         , Sub.map GotGraphMsg (Graph.subscriptions model.gridGraph)
+        , Sub.map GotDrawingMsg (Drawing.subscriptions model.drawCanvas)
         ]

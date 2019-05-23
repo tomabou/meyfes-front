@@ -6,6 +6,7 @@ html{
 
 body{
     color: #333;
+    background-color: rgba(0,0,0,0.03);
     font-size : 1.2rem;
     font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
 }
@@ -134,4 +135,8 @@ a:link, a:visited, a:hover, a:active{
 .btn-flat-border:hover {
   background: #d03c56;
   color: white;
+}
+
+#main_canvas {
+    background-color: #fff;
 }
