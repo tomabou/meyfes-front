@@ -7,44 +7,21 @@
 	<link rel="stylesheet" href="css/reset.css">
 	<link rel="stylesheet" href="css/style.css">
 	<link href="https://fonts.googleapis.com/css?family=Economica:700" rel=" stylesheet">
-	<script src="js/index.js"></script>
+	<script src="js/min.js"></script>
+	<script src="js/may3.js"></script>
+	<script src="js/wrapper_func.js"></script>
+	<script src="http://unpkg.com/elm-canvas/elm-canvas.js"></script>
 </head>
 
 <body>
 	<div id="elm"></div>
 	<script>
-		var app = Elm.Main.init({
+		const app = Elm.Main.init({
 			node: document.getElementById('elm'),
 		});
-		app.ports.imageString.subscribe(function (data) {
-			const width = 200;
-			const img = new Image();
-			img.src = data;
-			img.onload = () => {
-				const elem = document.createElement('canvas');
-				const scaleFactor = width / img.width;
-				elem.width = width;
-				elem.height = img.height * scaleFactor;
-				const ctx = elem.getContext('2d');
-				ctx.drawImage(img, 0, 0, width, img.height * scaleFactor);
-				ctx.canvas.toBlob(function (blob) {
-					blob.lastModifiedDate = new Date();
-					blob.name = "test";
-					// blob to file
-					var formdata = new FormData();
-					formdata.append("image", blob);
-
-					var xmlhttp = new XMLHttpRequest();
-					xmlhttp.onreadystatechange = function () {
-						if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-							app.ports.gridGraph.send(JSON.parse(xmlhttp.responseText))
-						}
-					};
-					xmlhttp.open("POST", "https://tomabou.com", true);
-					xmlhttp.send(formdata);
-				});
-			}
-		})
+		app.ports.imageString.subscribe(image_port_func);
+		app.ports.finalGridGraph.subscribe(maze_port_func);
+		app.ports.createGridGraph.subscribe(create_grid_graph);
 
 	</script>
 </body>

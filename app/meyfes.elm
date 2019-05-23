@@ -3,7 +3,10 @@ port module Main exposing (main)
 import Array
 import Browser
 import Browser.Events
+import Canvas as C
+import Color exposing (Color)
 import Constant exposing (..)
+import Drawing
 import File exposing (File)
 import File.Select as Select
 import Graph
@@ -17,6 +20,9 @@ import Task
 
 
 port imageString : E.Value -> Cmd msg
+
+
+port createGridGraph : Int -> Cmd msg
 
 
 port gridGraph : (E.Value -> msg) -> Sub msg
@@ -40,14 +46,20 @@ type State
 
 type alias Model =
     { image : Maybe String
+    , gridGraphSize : Int
     , gridGraph : Graph.Model
+    , drawCanvas : Drawing.Model
     , converteState : State
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model Nothing (Graph.initial 30 20) NotYet, Cmd.none )
+    let
+        ( cnv, cmd ) =
+            Drawing.init ()
+    in
+    ( Model Nothing 30 (Graph.initial 30 20) cnv NotYet, Cmd.none )
 
 
 type Msg
@@ -57,6 +69,9 @@ type Msg
     | FailedCreateGraph Json.Decode.Error
     | GraphCreated Graph.GraphInfo
     | GotGraphMsg Graph.Msg
+    | GotDrawingMsg Drawing.Msg
+    | CreateGridGraph
+    | ChangeSize Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -98,6 +113,23 @@ update msg model =
             in
             ( { model | gridGraph = graph }, Cmd.map GotGraphMsg cmd )
 
+        GotDrawingMsg drawingMsg ->
+            let
+                ( drawing, cmd ) =
+                    Drawing.update drawingMsg model.drawCanvas
+            in
+            ( { model | drawCanvas = drawing }, Cmd.map GotDrawingMsg cmd )
+
+        CreateGridGraph ->
+            ( model, createGridGraph model.gridGraphSize )
+
+        ChangeSize diff ->
+            let
+                newSize =
+                    Basics.max 5 <| Basics.min 80 (diff + model.gridGraphSize)
+            in
+            ( { model | gridGraphSize = newSize }, createGridGraph newSize )
+
 
 imageDecoder : Decoder String
 imageDecoder =
@@ -111,7 +143,8 @@ view model =
         , div [ class "wrapper", class "clearfix" ]
             [ main_ [ class "main" ]
                 [ viewImage model
-                , viewConverted model
+                , Html.map GotDrawingMsg (Drawing.view model.drawCanvas)
+                , viewGraphCreator model
                 , Html.map GotGraphMsg (Graph.view model.gridGraph)
                 ]
             ]
@@ -119,10 +152,27 @@ view model =
         ]
 
 
+viewGraphCreator : Model -> Html Msg
+viewGraphCreator model =
+    let
+        x =
+            floor (toFloat model.gridGraphSize / 5)
+    in
+    div
+        [ style "width" "750px"
+        , style "height" "80px"
+        , style "margin" "20px 0px 0px"
+        ]
+        [ div [ class "btn-wrap" ] [ button [ onClick CreateGridGraph, class "btn-flat-border" ] [ text "Create Graph" ] ]
+        , div [ class "btn-wrap" ] [ button [ onClick <| ChangeSize x, class "btn-flat-border3" ] [ text "＋" ] ]
+        , div [ class "btn-wrap" ] [ button [ onClick <| ChangeSize -x, class "btn-flat-border3" ] [ text "−" ] ]
+        ]
+
+
 viewHeader : Model -> Html Msg
 viewHeader model =
     header [ class "header" ]
-        [ h1 [ class "title", href urlPrefix ]
+        [ h1 [ class "title", href urlPrefix, id "header_id" ]
             [ text "Maze Creator"
             ]
         ]
@@ -196,12 +246,8 @@ subscriptions model =
                 Err err ->
                     FailedCreateGraph err
     in
-    if model.converteState == Processing then
-        gridGraph func
-
-    else
-        Sub.none
-
-
-
---    Sub.map GotGraphMsg (Graph.subscriptions model.gridGraph)
+    Sub.batch
+        [ gridGraph func
+        , Sub.map GotGraphMsg (Graph.subscriptions model.gridGraph)
+        , Sub.map GotDrawingMsg (Drawing.subscriptions model.drawCanvas)
+        ]

@@ -1,4 +1,4 @@
-module Graph exposing (GraphInfo, Model, Msg, decoder, initial, subscriptions, update, view)
+port module Graph exposing (GraphInfo, Model, Msg, decoder, initial, subscriptions, update, view)
 
 import Array exposing (..)
 import Browser.Events
@@ -18,6 +18,12 @@ import Svg.Lazy
 import Tuple exposing (first, second)
 
 
+port finalGridGraph : Json.Encode.Value -> Cmd msg
+
+
+port createdMaze : (Json.Encode.Value -> msg) -> Sub msg
+
+
 type alias Model =
     { vertex : Array (Array Bool)
     , edgeR : Set.Set ( Int, Int )
@@ -26,6 +32,7 @@ type alias Model =
     , routeRatio : Float
     , routeDistance : Int
     , showRoute : Bool
+    , mazeConverted : Maybe Json.Decode.Error
     }
 
 
@@ -39,7 +46,8 @@ type alias GraphInfo =
 type Msg
     = ChangeNode Int Int
     | SubmitGraph
-    | MazeCreated (Result Http.Error (Array (Array Int)))
+    | MazeCreated (Array (Array Int))
+    | FailedCreateMaze Json.Decode.Error
     | AnimeFrame Float
     | ShowRoute
 
@@ -71,7 +79,13 @@ initial x y =
     , routeRatio = 0
     , routeDistance = 0
     , showRoute = False
+    , mazeConverted = Nothing
     }
+
+
+isEmptyMaze : Array (Array Bool) -> Bool
+isEmptyMaze =
+    Array.map (foldl (||) False) >> foldl (||) False >> not
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -85,40 +99,45 @@ update msg model =
                 ( putVertex i j model, Cmd.none )
 
         SubmitGraph ->
-            ( model
-            , Http.post
-                { url = urlPrefix ++ "/maze"
-                , body =
-                    Http.jsonBody
+            let
+                ( xSize, ySize ) =
+                    getSize model
+
+                mazeMatrix =
+                    Json.Encode.array
                         (Json.Encode.array
-                            (Json.Encode.array
-                                (Json.Encode.int
-                                    << (\b ->
-                                            if b then
-                                                0
+                            (Json.Encode.int
+                                << (\b ->
+                                        if b then
+                                            0
 
-                                            else
-                                                1
-                                       )
-                                )
+                                        else
+                                            1
+                                   )
                             )
-                            model.vertex
                         )
-                , expect = Http.expectJson MazeCreated mazeDecoder
-                }
-            )
+                        model.vertex
 
-        MazeCreated result ->
-            case result of
-                Ok arr ->
-                    let
-                        routesize =
-                            foldl Basics.max 0 (Array.map (foldl Basics.max 0) arr) + 2
-                    in
-                    ( { model | maze = arr, routeDistance = routesize * 6 // 5, showRoute = False, routeRatio = 0 }, Cmd.none )
+                submitJson =
+                    Json.Encode.object [ ( "x", Json.Encode.int xSize ), ( "y", Json.Encode.int ySize ), ( "maze", mazeMatrix ) ]
+            in
+            if isEmptyMaze model.vertex then
+                ( model, Cmd.none )
 
-                Err err ->
-                    ( model, Cmd.none )
+            else
+                ( model
+                , finalGridGraph submitJson
+                )
+
+        MazeCreated arr ->
+            let
+                routesize =
+                    foldl Basics.max 0 (Array.map (foldl Basics.max 0) arr) + 2
+            in
+            ( { model | maze = arr, routeDistance = routesize * 6 // 5, showRoute = False, routeRatio = 0 }, Cmd.none )
+
+        FailedCreateMaze err ->
+            ( { model | mazeConverted = Just err }, Cmd.none )
 
         AnimeFrame time ->
             let
@@ -144,10 +163,12 @@ viewMaze model =
         threshold =
             floor (toFloat model.routeDistance * model.routeRatio) + 2
     in
-    svg
-        [ viewBox ("0 0 " ++ String.fromInt (i * 10) ++ " " ++ String.fromInt (j * 10)), class "svg_model" ]
-        [ rect [ class "maze_background", x "0", y "0", width (String.fromInt (i * 10)), height (String.fromInt (j * 10)) ] []
-        , Svg.Lazy.lazy2 viewMazeWall model.maze threshold
+    Html.div [ Html.Attributes.class "maze-svg" ]
+        [ svg
+            [ viewBox ("0 0 " ++ String.fromInt (i * 10) ++ " " ++ String.fromInt (j * 10)), class "svg_model" ]
+            [ rect [ class "maze_background", x "0", y "0", width (String.fromInt (i * 10)), height (String.fromInt (j * 10)) ] []
+            , Svg.Lazy.lazy2 viewMazeWall model.maze threshold
+            ]
         ]
 
 
@@ -220,17 +241,23 @@ view model =
             [ viewEdge model
             , Html.Lazy.lazy viewVertex model.vertex
             ]
-        , Html.button [ Html.Events.onClick SubmitGraph, Html.Attributes.class "btn-flat-border" ] [ Html.text "submit graph" ]
+        , Html.button [ Html.Events.onClick SubmitGraph, Html.Attributes.class "btn-flat-border" ] [ Html.text "Submit Graph" ]
         , viewMaze model
         , Html.button [ Html.Events.onClick ShowRoute, Html.Attributes.class "btn-flat-border" ]
             [ Html.text
                 (if model.showRoute then
-                    "hide answer"
+                    "Hide Answer"
 
                  else
-                    "show answer"
+                    "Show Answer"
                 )
             ]
+        , case model.mazeConverted of
+            Nothing ->
+                Html.div [] []
+
+            Just err ->
+                text (Json.Decode.errorToString err)
         ]
 
 
@@ -447,4 +474,13 @@ calcEdgeR set =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Browser.Events.onAnimationFrameDelta AnimeFrame
+    let
+        func value =
+            case Json.Decode.decodeValue mazeDecoder value of
+                Ok maze ->
+                    MazeCreated maze
+
+                Err err ->
+                    FailedCreateMaze err
+    in
+    createdMaze func

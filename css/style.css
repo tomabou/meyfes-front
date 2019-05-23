@@ -6,6 +6,7 @@ html{
 
 body{
     color: #333;
+    background-color: rgba(0,0,0,0.03);
     font-size : 1.2rem;
     font-family: "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
 }
@@ -90,7 +91,11 @@ a:link, a:visited, a:hover, a:active{
 
 .svg_model{
     width: 750px;
-    margin: 20px 0px;
+    margin: 10px 0px 0px;
+}
+
+.maze-svg{
+    margin: 0px 0px 5px;
 }
 .vertex .active{
     fill: #d03c56;
@@ -119,6 +124,8 @@ a:link, a:visited, a:hover, a:active{
     fill: #d03c56;
 }
 .btn-flat-border {
+    height: 80px;
+    margin: 0px 10px 0px 0px;
   font-size: 1.8em;
   font-weight: bold;
   display: inline-block;
@@ -134,4 +141,60 @@ a:link, a:visited, a:hover, a:active{
 .btn-flat-border:hover {
   background: #d03c56;
   color: white;
+}
+
+#main_canvas {
+    background-color: #fff;
+    width: 750px;
+    height:  500px;
+}
+elm-canvas {
+    display: block;
+    background-color: white;
+    box-shadow: 0 0 200px rgba(0, 0, 0, 0.07);
+  }
+
+.btn-flat-border2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  display: inline-block;
+  padding: 0.5em 0.5em;
+  text-decoration: none;
+  background: rgb(250, 250, 250);
+  color: #d03c56;
+  border: solid 2px #d03c56;
+  border-radius: 3px;
+  transition: .2s;
+}
+
+.btn-flat-border2:hover {
+  background: #d03c56;
+  color: white;
+}
+
+.btn-flat-border3 {
+  height: 80px;
+  width: 80px;
+
+  margin: 0px 10px;
+  font-size: 1.5em;
+  font-weight: bold;
+  display: inline-block;
+  text-decoration: none;
+  background: rgb(250, 250, 250);
+  color: #d03c56;
+  border: solid 2px #d03c56;
+  border-radius: 3px;
+  transition: .2s;
+}
+
+.btn-flat-border3:hover {
+  background: #d03c56;
+  color: white;
+}
+
+.btn-wrap {
+    display: inline-block;
+    vertical-align: middle;
+    height: 80px;
 }
