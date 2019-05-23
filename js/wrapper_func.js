@@ -5,11 +5,24 @@ Module.onRuntimeInitialized = () => {
         , "number",
         ["number", "number", "number", "array", "number", "array", "number"]);
 }
+
+
+const test_function = () => {
+    const canv = document.getElementById('canvas');
+    const ctx = canv.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canv.width, canv.height);
+    console.log(imageData.data.length)
+    const data = imageData.data
+    for (let i = 0; i < 30; i++) {
+        console.log(data[i + 2000]);
+    }
+}
+
 const maze_port_func = data => {
+    test_function()
     const x = data.x;
     const y = data.y;
     const maze = data.maze;
-    console.log(x, y);
 
     const vertex = [];
     for (let i = 0; i < x; i++) {
@@ -41,8 +54,6 @@ const maze_port_func = data => {
             }
         }
     }
-    console.log(vertex);
-    console.log(edge);
     const ans = { 'mazelist': run_wasm(x, y, vertex, edge) };
 
     app.ports.createdMaze.send(ans);
@@ -56,8 +67,6 @@ const run_wasm = (x, y, vertex_array, edge_array) => {
     const vlen = Math.floor(vertex_array.length / 2);
     const elen = Math.floor(edge_array.length / 4);
     const buf_size = (x + 1) * (y + 1) * 16;
-    console.log(buf_size);
-    console.log(vlen, elen);
     const maze_buf = Module._malloc(buf_size * 4);
     Module.ccall("create_maze"
         , "number",
@@ -76,7 +85,6 @@ const run_wasm = (x, y, vertex_array, edge_array) => {
         }
         ans[ans_index].push(j);
     }
-    console.log(ans);
     ans.pop(); ans.pop();
     Module._free(maze_buf);
     const transpose = a => a[0].map((_, c) => a.map(r => r[c]));
