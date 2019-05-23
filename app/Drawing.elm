@@ -66,7 +66,7 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( { frames = 0
       , pending = Array.empty
-      , toDraw = []
+      , toDraw = [ shapes [ fill Color.white ] [ rect ( 0, 0 ) w h ] ]
       , drawingPointer = Nothing
       , color = Color.lightBlue
       , size = 20

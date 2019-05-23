@@ -212,16 +212,9 @@ subscriptions model =
 
                 Err err ->
                     FailedCreateGraph err
-
-        sub1 =
-            if model.converteState == Processing then
-                gridGraph func
-
-            else
-                Sub.none
     in
     Sub.batch
-        [ sub1
+        [ gridGraph func
         , Sub.map GotGraphMsg (Graph.subscriptions model.gridGraph)
         , Sub.map GotDrawingMsg (Drawing.subscriptions model.drawCanvas)
         ]

@@ -22,15 +22,15 @@ const get_color_func = (imageData, yoko, tate) => (
     (x, y) => {
         const y_pos = Math.floor((y + 1) * imageData.height / (tate + 1));
         const x_pos = Math.floor((x + 1) * imageData.width / (yoko + 1));
-        const blue = imageData.data[((y_pos * (imageData.width * 4)) + (x_pos * 4)) + 2];
-        return blue > 1;
+        const red = imageData.data[((y_pos * (imageData.width * 4)) + (x_pos * 4))];
+        return red < 150;
     });
 
-const create_edge_list = (vertex_list, tate, yoko) => {
+const create_edge_list = (vertex, tate, yoko) => {
     const edgeC = []
     for (let i = 0; i < yoko; i++) {
         for (let j = 0; j < tate - 1; j++) {
-            if (vertex_list[i][j] && vertex_list[i][j + 1]) {
+            if (vertex[i][j] && vertex[i][j + 1]) {
                 edgeC.push(i * 1000 + j);
             }
         }
@@ -38,12 +38,25 @@ const create_edge_list = (vertex_list, tate, yoko) => {
     const edgeR = []
     for (let i = 0; i < yoko - 1; i++) {
         for (let j = 0; j < tate; j++) {
-            if (vertex_list[i][j] && vertex_list[i + 1][j]) {
+            if (vertex[i][j] && vertex[i + 1][j]) {
                 edgeR.push(i * 1000 + j);
             }
         }
     }
-    return [edgeR, edgeC]
+    const vertex_list = []
+    for (let i = 0; i < yoko; i++) {
+        vertex_list.push([])
+        for (let j = 0; j < tate; j++) {
+            if (vertex[i][j]) {
+                vertex_list[i].push(1);
+            }
+            else {
+                vertex_list[i].push(0);
+            }
+        }
+    }
+
+    return [vertex_list, edgeR, edgeC]
 }
 
 
@@ -61,13 +74,14 @@ const create_grid_graph = yoko => {
             vertex[i].push(get_color(i, j));
         }
     }
-    const [edgeR, edgeC] = create_edge_list(vertex, tate, yoko);
+    const [vertex_list, edgeR, edgeC] = create_edge_list(vertex, tate, yoko);
     const res = {
-        "vertex": vertex,
+        "vertex": vertex_list,
         "edgeR": edgeR,
         "edgeC": edgeC
     }
     console.log(res);
+    app.ports.gridGraph.send(res);
 }
 
 const maze_port_func = data => {
